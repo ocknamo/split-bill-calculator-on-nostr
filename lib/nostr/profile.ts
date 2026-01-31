@@ -1,11 +1,11 @@
-import { nip19, SimplePool } from "nostr-tools"
-import { DEFAULT_RELAYS } from "@/lib/constants"
-import type { NostrProfile } from "@/types/nostr"
+import { nip19, SimplePool } from 'nostr-tools'
+import { DEFAULT_RELAYS } from '@/lib/constants'
+import type { NostrProfile } from '@/types/nostr'
 
 export function isValidNpub(npub: string): boolean {
   try {
     const decoded = nip19.decode(npub)
-    return decoded.type === "npub"
+    return decoded.type === 'npub'
   } catch {
     return false
   }
@@ -14,7 +14,7 @@ export function isValidNpub(npub: string): boolean {
 export function npubToHex(npub: string): string | null {
   try {
     const decoded = nip19.decode(npub)
-    if (decoded.type === "npub") {
+    if (decoded.type === 'npub') {
       return decoded.data as string
     }
     return null
@@ -25,9 +25,7 @@ export function npubToHex(npub: string): string | null {
 
 const FETCH_TIMEOUT_MS = 10000 // 10 seconds timeout
 
-export async function fetchNostrProfile(
-  npub: string
-): Promise<NostrProfile | null> {
+export async function fetchNostrProfile(npub: string): Promise<NostrProfile | null> {
   const pubkey = npubToHex(npub)
   if (!pubkey) return null
 
@@ -36,7 +34,7 @@ export async function fetchNostrProfile(
   try {
     // Create a timeout promise
     const timeoutPromise = new Promise<null>((_, reject) => {
-      setTimeout(() => reject(new Error("Timeout")), FETCH_TIMEOUT_MS)
+      setTimeout(() => reject(new Error('Timeout')), FETCH_TIMEOUT_MS)
     })
 
     // Race between fetch and timeout
@@ -60,7 +58,7 @@ export async function fetchNostrProfile(
     }
     return null
   } catch (error) {
-    console.error("Failed to fetch Nostr profile:", error)
+    console.error('Failed to fetch Nostr profile:', error)
     return null
   } finally {
     pool.close([...DEFAULT_RELAYS])

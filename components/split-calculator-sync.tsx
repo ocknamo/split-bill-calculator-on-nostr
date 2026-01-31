@@ -1,31 +1,29 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Users, Receipt, AlertTriangle, ArrowLeft } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-
-import { useBtcPrice } from "@/hooks/use-btc-price"
-import { useCurrency } from "@/hooks/use-currency"
-
-import { SettlementHeader } from "@/components/split-calculator/settlement-header"
-import { MemberList } from "@/components/split-calculator/member-list"
-import { ExpenseForm } from "@/components/split-calculator/expense-form"
-import { ExpenseList } from "@/components/split-calculator/expense-list"
-import { SettlementList } from "@/components/split-calculator/settlement-list"
-import { PriceFooter } from "@/components/split-calculator/price-footer"
-import { CurrencySwitcher } from "@/components/split-calculator/currency-switcher"
-import { LockSettlementDialog } from "@/components/split-calculator/lock-settlement-dialog"
-import { LightningPaymentModal } from "@/components/lightning-payment-modal"
+import { AlertTriangle, ArrowLeft, Receipt, Users } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { LightningPaymentModal } from '@/components/lightning-payment-modal'
+import { CurrencySwitcher } from '@/components/split-calculator/currency-switcher'
+import { ExpenseForm } from '@/components/split-calculator/expense-form'
+import { ExpenseList } from '@/components/split-calculator/expense-list'
+import { LockSettlementDialog } from '@/components/split-calculator/lock-settlement-dialog'
+import { MemberList } from '@/components/split-calculator/member-list'
+import { PriceFooter } from '@/components/split-calculator/price-footer'
+import { SettlementHeader } from '@/components/split-calculator/settlement-header'
+import { SettlementList } from '@/components/split-calculator/settlement-list'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useBtcPrice } from '@/hooks/use-btc-price'
+import { useCurrency } from '@/hooks/use-currency'
 import {
-  useSettlementSync,
-  generateInviteLink,
   type ConnectionStatus,
-} from "@/lib/nostr/settlement/hooks"
-import type { SettlementState } from "@/lib/nostr/settlement/state"
+  generateInviteLink,
+  useSettlementSync,
+} from '@/lib/nostr/settlement/hooks'
+import type { SettlementState } from '@/lib/nostr/settlement/state'
 
-import type { Member, Expense, Settlement, Currency } from "@/types/split-calculator"
+import type { Currency, Expense, Member, Settlement } from '@/types/split-calculator'
 
 interface SplitCalculatorSyncProps {
   settlementId: string
@@ -50,7 +48,7 @@ function stateToExpenses(state: SettlementState | null): Expense[] {
     description: e.note,
     amount: e.amount,
     paidById: e.memberPubkey,
-    currency: (e.currency?.toLowerCase() || "jpy") as Currency,
+    currency: (e.currency?.toLowerCase() || 'jpy') as Currency,
   }))
 }
 
@@ -70,8 +68,8 @@ export function SplitCalculatorSync({
     amount: number
   }>({
     isOpen: false,
-    lud16: "",
-    recipientName: "",
+    lud16: '',
+    recipientName: '',
     recipientPicture: undefined,
     amount: 0,
   })
@@ -103,18 +101,12 @@ export function SplitCalculatorSync({
   const members = useMemo(() => stateToMembers(state), [state])
   const expenses = useMemo(() => stateToExpenses(state), [state])
 
-  const settlementName = state?.name || "精算"
-  const settlementCurrency = (state?.currency?.toLowerCase() || "jpy") as Currency
+  const settlementName = state?.name || '精算'
+  const settlementCurrency = (state?.currency?.toLowerCase() || 'jpy') as Currency
   const isLocked = state?.isLocked || false
 
-  const {
-    currency,
-    setCurrency,
-    formatCurrency,
-    currencySymbol,
-    fiatToSats,
-    formatBtcPrice,
-  } = useCurrency(btcPrice, settlementCurrency, () => {})
+  const { currency, setCurrency, formatCurrency, currencySymbol, fiatToSats, formatBtcPrice } =
+    useCurrency(btcPrice, settlementCurrency, () => {})
 
   // Calculate settlements
   const { totalAmount, perPerson, settlements, getMemberPaidTotal } = useMemo(() => {
@@ -149,8 +141,12 @@ export function SplitCalculatorSync({
 
     // Generate settlements
     const settlementsList: Settlement[] = []
-    const debtors = members.filter((m) => balances[m.id] < -0.01).map((m) => ({ ...m, balance: balances[m.id] }))
-    const creditors = members.filter((m) => balances[m.id] > 0.01).map((m) => ({ ...m, balance: balances[m.id] }))
+    const debtors = members
+      .filter((m) => balances[m.id] < -0.01)
+      .map((m) => ({ ...m, balance: balances[m.id] }))
+    const creditors = members
+      .filter((m) => balances[m.id] > 0.01)
+      .map((m) => ({ ...m, balance: balances[m.id] }))
 
     debtors.sort((a, b) => a.balance - b.balance)
     creditors.sort((a, b) => b.balance - a.balance)
@@ -188,7 +184,7 @@ export function SplitCalculatorSync({
 
   // Generate invite link
   const inviteLink = useMemo(() => {
-    if (typeof window === "undefined") return ""
+    if (typeof window === 'undefined') return ''
     return generateInviteLink(settlementId, inviteToken, window.location.origin)
   }, [settlementId, inviteToken])
 
@@ -202,7 +198,7 @@ export function SplitCalculatorSync({
 
   const handleRemoveMember = useCallback((id: string) => {
     // In sync mode, we cannot remove members (append-only)
-    console.warn("Cannot remove members in sync mode")
+    console.warn('Cannot remove members in sync mode')
   }, [])
 
   const handleAddExpense = useCallback(
@@ -220,7 +216,7 @@ export function SplitCalculatorSync({
   const handleRemoveExpense = useCallback((id: string) => {
     // In sync mode, we cannot remove expenses (append-only)
     // Instead, add a negative expense for correction
-    console.warn("Cannot remove expenses in sync mode. Use negative amount for corrections.")
+    console.warn('Cannot remove expenses in sync mode. Use negative amount for corrections.')
   }, [])
 
   const handleTogglePaid = useCallback((settlementId: string) => {
@@ -264,7 +260,7 @@ export function SplitCalculatorSync({
         id: e.id,
         description: e.description,
         amount: e.amount,
-        memberName: member?.name || "Unknown",
+        memberName: member?.name || 'Unknown',
         isValid: !invalidExpense,
         invalidReason: invalidExpense?.reason,
       }
@@ -285,10 +281,10 @@ export function SplitCalculatorSync({
   }
 
   const connectionStatusMap: Record<string, ConnectionStatus> = {
-    connecting: "connecting",
-    connected: "connected",
-    disconnected: "disconnected",
-    error: "error",
+    connecting: 'connecting',
+    connected: 'connected',
+    disconnected: 'disconnected',
+    error: 'error',
   }
 
   return (
@@ -306,16 +302,14 @@ export function SplitCalculatorSync({
           isOwner={isOwner}
           isLocked={isLocked}
           inviteLink={inviteLink}
-          connectionStatus={connectionStatusMap[connectionStatus] || "disconnected"}
+          connectionStatus={connectionStatusMap[connectionStatus] || 'disconnected'}
           onNameChange={undefined} // Name change requires republishing settlement event
         />
 
         {syncError && (
           <Alert className="mb-6 border-destructive bg-destructive/10">
             <AlertTriangle className="h-4 w-4 text-destructive" />
-            <AlertDescription className="text-destructive">
-              {syncError}
-            </AlertDescription>
+            <AlertDescription className="text-destructive">{syncError}</AlertDescription>
           </Alert>
         )}
 
@@ -394,9 +388,7 @@ export function SplitCalculatorSync({
           <Card className="border-2 border-dashed border-muted">
             <CardContent className="py-12 text-center">
               <Receipt className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <p className="mt-4 text-muted-foreground">
-                支出を追加すると精算結果が表示されます
-              </p>
+              <p className="mt-4 text-muted-foreground">支出を追加すると精算結果が表示されます</p>
             </CardContent>
           </Card>
         )}

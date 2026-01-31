@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Check, Copy, Edit2, Lock, Share2 } from 'lucide-react'
+import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Share2, Copy, Check, Lock, Edit2 } from "lucide-react"
-import { SyncStatusIndicator, type ConnectionStatus } from "./sync-status-indicator"
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { type ConnectionStatus, SyncStatusIndicator } from './sync-status-indicator'
 
 interface SettlementHeaderProps {
   name: string
@@ -44,11 +44,11 @@ export function SettlementHeader({
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // Fallback for older browsers
-      const textArea = document.createElement("textarea")
+      const textArea = document.createElement('textarea')
       textArea.value = inviteLink
       document.body.appendChild(textArea)
       textArea.select()
-      document.execCommand("copy")
+      document.execCommand('copy')
       document.body.removeChild(textArea)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -73,8 +73,8 @@ export function SettlementHeader({
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSaveName()
-                    if (e.key === "Escape") setIsEditing(false)
+                    if (e.key === 'Enter') handleSaveName()
+                    if (e.key === 'Escape') setIsEditing(false)
                   }}
                   className="h-8 text-lg font-bold"
                   autoFocus
@@ -135,11 +135,7 @@ export function SettlementHeader({
               </DialogHeader>
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Input
-                    value={inviteLink}
-                    readOnly
-                    className="font-mono text-xs"
-                  />
+                  <Input value={inviteLink} readOnly className="font-mono text-xs" />
                   <Button
                     onClick={handleCopyLink}
                     variant="outline"
@@ -154,11 +150,7 @@ export function SettlementHeader({
                     )}
                   </Button>
                 </div>
-                {copied && (
-                  <p className="text-center text-sm text-green-600">
-                    コピーしました
-                  </p>
-                )}
+                {copied && <p className="text-center text-sm text-green-600">コピーしました</p>}
                 <p className="text-xs text-muted-foreground">
                   このリンクには招待トークンが含まれています。
                   リンクを共有された人は精算に参加し、支出を追加できます。

@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react"
-import type { BtcPrice } from "@/types/split-calculator"
-import { COINGECKO_API_URL } from "@/lib/constants"
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { COINGECKO_API_URL } from '@/lib/constants'
+import type { BtcPrice } from '@/types/split-calculator'
 
 const RATE_LIMIT_COOLDOWN_MS = 60000 // 1 minute cooldown after rate limit
 const MIN_FETCH_INTERVAL_MS = 10000 // Minimum 10 seconds between fetches
@@ -41,7 +41,7 @@ export function useBtcPrice() {
       if (res.status === 429) {
         rateLimitEndTime.current = now + RATE_LIMIT_COOLDOWN_MS
         setRateLimited(true)
-        setError("APIのレート制限に達しました。1分後に再試行してください")
+        setError('APIのレート制限に達しました。1分後に再試行してください')
         setLoading(false)
         return
       }
@@ -58,10 +58,10 @@ export function useBtcPrice() {
         lastFetchTime.current = now
         setError(null)
       } else {
-        throw new Error("Invalid response format")
+        throw new Error('Invalid response format')
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "不明なエラー"
+      const message = err instanceof Error ? err.message : '不明なエラー'
       setError(`価格の取得に失敗しました: ${message}`)
       // Keep existing price if available
     } finally {

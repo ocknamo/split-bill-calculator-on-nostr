@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import Image from "next/image"
-import type { Member } from "@/types/split-calculator"
+import Image from 'next/image'
+import { useState } from 'react'
+import type { Member } from '@/types/split-calculator'
 
 interface MemberAvatarProps {
   member: Member
@@ -15,12 +15,12 @@ export function MemberAvatar({ member, size = 32 }: MemberAvatarProps) {
 
   if (member.nostrProfile?.picture && !imageError) {
     return (
-      <div 
+      <div
         className="relative shrink-0 overflow-hidden rounded-full border-2 border-border"
         style={{ width: size, height: size }}
       >
         <Image
-          src={member.nostrProfile.picture || "/placeholder.svg"}
+          src={member.nostrProfile.picture || '/placeholder.svg'}
           alt={`${member.name}のアバター`}
           fill
           sizes={`${size}px`}
@@ -33,7 +33,7 @@ export function MemberAvatar({ member, size = 32 }: MemberAvatarProps) {
   }
 
   return (
-    <div 
+    <div
       className="flex shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground"
       style={{ width: size, height: size }}
       role="img"

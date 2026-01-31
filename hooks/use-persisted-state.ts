@@ -1,19 +1,19 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useCallback } from "react"
+import { useCallback, useEffect, useState } from 'react'
 
-const STORAGE_KEY = "warikan-calculator-data"
+const STORAGE_KEY = 'warikan-calculator-data'
 
 interface PersistedData {
   members: unknown[]
   expenses: unknown[]
   paidSettlements: string[]
-  currency: "jpy" | "usd"
+  currency: 'jpy' | 'usd'
   savedAt: string
 }
 
 export function usePersistedState<T>(
-  key: keyof Omit<PersistedData, "savedAt">,
+  key: keyof Omit<PersistedData, 'savedAt'>,
   initialValue: T
 ): [T, (value: T | ((prev: T) => T)) => void, boolean] {
   const [value, setValue] = useState<T>(initialValue)
@@ -30,7 +30,7 @@ export function usePersistedState<T>(
         }
       }
     } catch (error) {
-      console.error("Failed to load persisted state:", error)
+      console.error('Failed to load persisted state:', error)
     }
     setIsLoaded(true)
   }, [key])
@@ -39,22 +39,21 @@ export function usePersistedState<T>(
   const setPersistedValue = useCallback(
     (newValue: T | ((prev: T) => T)) => {
       setValue((prev) => {
-        const resolvedValue = typeof newValue === "function" 
-          ? (newValue as (prev: T) => T)(prev) 
-          : newValue
+        const resolvedValue =
+          typeof newValue === 'function' ? (newValue as (prev: T) => T)(prev) : newValue
 
         try {
           const stored = sessionStorage.getItem(STORAGE_KEY)
           const existing: PersistedData = stored
             ? JSON.parse(stored)
-            : { members: [], expenses: [], paidSettlements: [], currency: "jpy", savedAt: "" }
+            : { members: [], expenses: [], paidSettlements: [], currency: 'jpy', savedAt: '' }
 
-          existing[key] = resolvedValue as PersistedData[keyof Omit<PersistedData, "savedAt">]
+          existing[key] = resolvedValue as PersistedData[keyof Omit<PersistedData, 'savedAt'>]
           existing.savedAt = new Date().toISOString()
 
           sessionStorage.setItem(STORAGE_KEY, JSON.stringify(existing))
         } catch (error) {
-          console.error("Failed to persist state:", error)
+          console.error('Failed to persist state:', error)
         }
 
         return resolvedValue
@@ -70,6 +69,6 @@ export function clearPersistedData(): void {
   try {
     sessionStorage.removeItem(STORAGE_KEY)
   } catch (error) {
-    console.error("Failed to clear persisted data:", error)
+    console.error('Failed to clear persisted data:', error)
   }
 }

@@ -1,20 +1,20 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Receipt } from 'lucide-react'
+import { useState } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Receipt } from "lucide-react"
-import type { Member, Expense, Currency } from "@/types/split-calculator"
+} from '@/components/ui/select'
+import type { Currency, Expense, Member } from '@/types/split-calculator'
 
 interface ExpenseFormProps {
   members: Member[]
@@ -23,16 +23,11 @@ interface ExpenseFormProps {
   currencySymbol: string
 }
 
-export function ExpenseForm({
-  members,
-  onAddExpense,
-  currency,
-  currencySymbol,
-}: ExpenseFormProps) {
+export function ExpenseForm({ members, onAddExpense, currency, currencySymbol }: ExpenseFormProps) {
   const [newExpense, setNewExpense] = useState({
-    description: "",
-    amount: "",
-    paidById: "",
+    description: '',
+    amount: '',
+    paidById: '',
   })
 
   const addExpense = () => {
@@ -44,7 +39,7 @@ export function ExpenseForm({
         paidById: newExpense.paidById,
         currency: currency,
       })
-      setNewExpense({ description: "", amount: "", paidById: "" })
+      setNewExpense({ description: '', amount: '', paidById: '' })
     }
   }
 
@@ -67,12 +62,14 @@ export function ExpenseForm({
               onValueChange={(value) => setNewExpense({ ...newExpense, paidById: value })}
               disabled={members.length === 0}
             >
-              <SelectTrigger 
+              <SelectTrigger
                 id="paidBy"
                 className="mt-1 border-2"
-                aria-describedby={members.length === 0 ? "paidby-hint" : undefined}
+                aria-describedby={members.length === 0 ? 'paidby-hint' : undefined}
               >
-                <SelectValue placeholder={members.length === 0 ? "先にメンバーを追加" : "選択してください"} />
+                <SelectValue
+                  placeholder={members.length === 0 ? '先にメンバーを追加' : '選択してください'}
+                />
               </SelectTrigger>
               {members.length === 0 && (
                 <p id="paidby-hint" className="sr-only">
@@ -85,8 +82,13 @@ export function ExpenseForm({
                     <div className="flex max-w-[200px] items-center gap-2">
                       {member.nostrProfile?.picture && (
                         <Avatar className="h-5 w-5 shrink-0">
-                          <AvatarImage src={member.nostrProfile.picture || "/placeholder.svg"} alt={member.name} />
-                          <AvatarFallback className="text-xs">{member.name.slice(0, 1)}</AvatarFallback>
+                          <AvatarImage
+                            src={member.nostrProfile.picture || '/placeholder.svg'}
+                            alt={member.name}
+                          />
+                          <AvatarFallback className="text-xs">
+                            {member.name.slice(0, 1)}
+                          </AvatarFallback>
                         </Avatar>
                       )}
                       <span className="truncate">{member.name}</span>

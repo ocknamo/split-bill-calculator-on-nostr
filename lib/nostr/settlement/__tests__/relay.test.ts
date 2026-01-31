@@ -2,15 +2,16 @@
  * Relay通信層のテスト
  * TDD Red Phase: Relay通信のテストケース
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import type { Event } from "nostr-tools"
+
+import type { Event } from 'nostr-tools'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { EXPENSE_KIND, LOCK_KIND, MEMBER_KIND, SETTLEMENT_KIND } from '../events/types'
 import {
   createRelayClient,
   type RelayClient,
   type RelayConfig,
   type SubscriptionOptions,
-} from "../relay"
-import { SETTLEMENT_KIND, MEMBER_KIND, EXPENSE_KIND, LOCK_KIND } from "../events/types"
+} from '../relay'
 
 // モックSimplePool
 const mockPool = {
@@ -19,17 +20,17 @@ const mockPool = {
   close: vi.fn(),
 }
 
-vi.mock("nostr-tools", async () => {
-  const actual = await vi.importActual("nostr-tools")
+vi.mock('nostr-tools', async () => {
+  const actual = await vi.importActual('nostr-tools')
   return {
     ...actual,
     SimplePool: vi.fn(() => mockPool),
   }
 })
 
-describe("RelayClient", () => {
+describe('RelayClient', () => {
   const defaultConfig: RelayConfig = {
-    relays: ["wss://relay1.example.com", "wss://relay2.example.com"],
+    relays: ['wss://relay1.example.com', 'wss://relay2.example.com'],
     timeout: 5000,
   }
 
@@ -44,8 +45,8 @@ describe("RelayClient", () => {
     client.close()
   })
 
-  describe("createRelayClient", () => {
-    it("should create client with config", () => {
+  describe('createRelayClient', () => {
+    it('should create client with config', () => {
       expect(client).toBeDefined()
       expect(client.subscribe).toBeDefined()
       expect(client.publish).toBeDefined()
@@ -53,9 +54,9 @@ describe("RelayClient", () => {
     })
   })
 
-  describe("subscribe", () => {
-    it("should subscribe to settlement events with correct filter", () => {
-      const settlementId = "test-settlement-id"
+  describe('subscribe', () => {
+    it('should subscribe to settlement events with correct filter', () => {
+      const settlementId = 'test-settlement-id'
       const onEvent = vi.fn()
       const onEose = vi.fn()
 
@@ -74,13 +75,8 @@ describe("RelayClient", () => {
       const calls = mockPool.subscribeMany.mock.calls[0]
       expect(calls[0]).toEqual(defaultConfig.relays)
       expect(calls[1]).toEqual({
-        kinds: [
-          SETTLEMENT_KIND,
-          MEMBER_KIND,
-          EXPENSE_KIND,
-          LOCK_KIND,
-        ],
-        "#d": [settlementId],
+        kinds: [SETTLEMENT_KIND, MEMBER_KIND, EXPENSE_KIND, LOCK_KIND],
+        '#d': [settlementId],
       })
       expect(calls[2]).toHaveProperty('onevent')
       expect(calls[2]).toHaveProperty('oneose')
@@ -91,8 +87,8 @@ describe("RelayClient", () => {
       expect(sub.close).toBeDefined()
     })
 
-    it("should filter by specific kinds when provided", () => {
-      const settlementId = "test-settlement-id"
+    it('should filter by specific kinds when provided', () => {
+      const settlementId = 'test-settlement-id'
       const mockSubCloser = { close: vi.fn() }
       mockPool.subscribeMany.mockReturnValue(mockSubCloser)
 
@@ -106,19 +102,19 @@ describe("RelayClient", () => {
         defaultConfig.relays,
         {
           kinds: [EXPENSE_KIND],
-          "#d": [settlementId],
+          '#d': [settlementId],
         },
         expect.any(Object)
       )
     })
 
-    it("should call onEvent when event received", () => {
+    it('should call onEvent when event received', () => {
       const onEvent = vi.fn()
       const mockSubCloser = { close: vi.fn() }
       mockPool.subscribeMany.mockReturnValue(mockSubCloser)
 
       client.subscribe({
-        settlementId: "test-id",
+        settlementId: 'test-id',
         onEvent,
       })
 
@@ -128,13 +124,13 @@ describe("RelayClient", () => {
 
       // モックイベントを送信
       const mockEvent: Event = {
-        id: "event-id",
-        pubkey: "pubkey",
+        id: 'event-id',
+        pubkey: 'pubkey',
         created_at: Math.floor(Date.now() / 1000),
         kind: EXPENSE_KIND,
-        tags: [["d", "test-id"]],
-        content: "{}",
-        sig: "sig",
+        tags: [['d', 'test-id']],
+        content: '{}',
+        sig: 'sig',
       }
 
       callbacks.onevent(mockEvent)
@@ -142,13 +138,13 @@ describe("RelayClient", () => {
       expect(onEvent).toHaveBeenCalledWith(mockEvent)
     })
 
-    it("should call onEose when end of stored events", () => {
+    it('should call onEose when end of stored events', () => {
       const onEose = vi.fn()
       const mockSubCloser = { close: vi.fn() }
       mockPool.subscribeMany.mockReturnValue(mockSubCloser)
 
       client.subscribe({
-        settlementId: "test-id",
+        settlementId: 'test-id',
         onEvent: vi.fn(),
         onEose,
       })
@@ -162,16 +158,16 @@ describe("RelayClient", () => {
     })
   })
 
-  describe("publish", () => {
-    it("should publish event to all relays", async () => {
+  describe('publish', () => {
+    it('should publish event to all relays', async () => {
       const event: Event = {
-        id: "event-id",
-        pubkey: "pubkey",
+        id: 'event-id',
+        pubkey: 'pubkey',
         created_at: Math.floor(Date.now() / 1000),
         kind: EXPENSE_KIND,
-        tags: [["d", "test-id"]],
-        content: "{}",
-        sig: "sig",
+        tags: [['d', 'test-id']],
+        content: '{}',
+        sig: 'sig',
       }
 
       mockPool.publish.mockResolvedValue(undefined)
@@ -181,25 +177,25 @@ describe("RelayClient", () => {
       expect(mockPool.publish).toHaveBeenCalledWith(defaultConfig.relays, event)
     })
 
-    it("should throw on publish failure", async () => {
+    it('should throw on publish failure', async () => {
       const event: Event = {
-        id: "event-id",
-        pubkey: "pubkey",
+        id: 'event-id',
+        pubkey: 'pubkey',
         created_at: Math.floor(Date.now() / 1000),
         kind: EXPENSE_KIND,
         tags: [],
-        content: "{}",
-        sig: "sig",
+        content: '{}',
+        sig: 'sig',
       }
 
-      mockPool.publish.mockRejectedValue(new Error("Publish failed"))
+      mockPool.publish.mockRejectedValue(new Error('Publish failed'))
 
-      await expect(client.publish(event)).rejects.toThrow("Publish failed")
+      await expect(client.publish(event)).rejects.toThrow('Publish failed')
     })
   })
 
-  describe("close", () => {
-    it("should close pool connection", () => {
+  describe('close', () => {
+    it('should close pool connection', () => {
       client.close()
 
       expect(mockPool.close).toHaveBeenCalledWith(defaultConfig.relays)
@@ -207,28 +203,28 @@ describe("RelayClient", () => {
   })
 })
 
-describe("fetchSettlementEvents", () => {
-  it("should fetch all events for a settlement", async () => {
-    const { fetchSettlementEvents } = await import("../relay")
+describe('fetchSettlementEvents', () => {
+  it('should fetch all events for a settlement', async () => {
+    const { fetchSettlementEvents } = await import('../relay')
 
     const mockEvents: Event[] = [
       {
-        id: "event-1",
-        pubkey: "pubkey",
+        id: 'event-1',
+        pubkey: 'pubkey',
         created_at: 1000,
         kind: SETTLEMENT_KIND,
-        tags: [["d", "settlement-id"]],
-        content: "{}",
-        sig: "sig",
+        tags: [['d', 'settlement-id']],
+        content: '{}',
+        sig: 'sig',
       },
       {
-        id: "event-2",
-        pubkey: "pubkey",
+        id: 'event-2',
+        pubkey: 'pubkey',
         created_at: 1001,
         kind: MEMBER_KIND,
-        tags: [["d", "settlement-id"]],
-        content: "{}",
-        sig: "sig",
+        tags: [['d', 'settlement-id']],
+        content: '{}',
+        sig: 'sig',
       },
     ]
 
@@ -246,11 +242,11 @@ describe("fetchSettlementEvents", () => {
     })
 
     const config: RelayConfig = {
-      relays: ["wss://relay.example.com"],
+      relays: ['wss://relay.example.com'],
       timeout: 5000,
     }
 
-    const events = await fetchSettlementEvents(config, "settlement-id")
+    const events = await fetchSettlementEvents(config, 'settlement-id')
 
     expect(events).toHaveLength(2)
     expect(events).toEqual(mockEvents)

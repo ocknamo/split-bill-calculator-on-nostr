@@ -2,24 +2,24 @@
  * Event creation and parsing for settlement protocol
  */
 
-import { calculateCap, calculateInviteHash, verifyCap } from "./capability"
+import { calculateCap, calculateInviteHash, verifyCap } from './capability'
 import {
+  EXPENSE_KIND,
   type ExpenseContent,
   type ExpenseEvent,
-  EXPENSE_KIND,
+  LOCK_KIND,
   type LockContent,
   type LockEvent,
-  LOCK_KIND,
+  MEMBER_KIND,
   type MemberContent,
   type MemberEvent,
   type MemberInfo,
-  MEMBER_KIND,
   type NostrEvent,
+  SETTLEMENT_KIND,
   type SettlementContent,
   type SettlementEvent,
-  SETTLEMENT_KIND,
   type UnsignedEvent,
-} from "./events/types"
+} from './events/types'
 
 // ============================================================================
 // Event Creation (returns unsigned events)
@@ -46,9 +46,9 @@ export async function createSettlementEvent(
     created_at: Math.floor(Date.now() / 1000),
     kind: SETTLEMENT_KIND,
     tags: [
-      ["d", settlementId],
-      ["owner", ownerPubkey],
-      ["invite_hash", inviteHash],
+      ['d', settlementId],
+      ['owner', ownerPubkey],
+      ['invite_hash', inviteHash],
     ],
     content: JSON.stringify(content),
   }
@@ -60,9 +60,7 @@ interface CreateMemberEventParams {
   members: MemberInfo[]
 }
 
-export function createMemberEvent(
-  params: CreateMemberEventParams
-): UnsignedEvent {
+export function createMemberEvent(params: CreateMemberEventParams): UnsignedEvent {
   const { settlementId, ownerPubkey, members } = params
 
   const content: MemberContent = { members }
@@ -71,7 +69,7 @@ export function createMemberEvent(
     pubkey: ownerPubkey,
     created_at: Math.floor(Date.now() / 1000),
     kind: MEMBER_KIND,
-    tags: [["d", settlementId]],
+    tags: [['d', settlementId]],
     content: JSON.stringify(content),
   }
 }
@@ -86,18 +84,8 @@ interface CreateExpenseEventParams {
   note: string
 }
 
-export async function createExpenseEvent(
-  params: CreateExpenseEventParams
-): Promise<UnsignedEvent> {
-  const {
-    settlementId,
-    inviteToken,
-    actorPubkey,
-    memberPubkey,
-    amount,
-    currency,
-    note,
-  } = params
+export async function createExpenseEvent(params: CreateExpenseEventParams): Promise<UnsignedEvent> {
+  const { settlementId, inviteToken, actorPubkey, memberPubkey, amount, currency, note } = params
 
   const content: ExpenseContent = {
     member_pubkey: memberPubkey,
@@ -113,8 +101,8 @@ export async function createExpenseEvent(
     created_at: Math.floor(Date.now() / 1000),
     kind: EXPENSE_KIND,
     tags: [
-      ["d", settlementId],
-      ["cap", cap],
+      ['d', settlementId],
+      ['cap', cap],
     ],
     content: JSON.stringify(content),
   }
@@ -130,7 +118,7 @@ export function createLockEvent(params: CreateLockEventParams): UnsignedEvent {
   const { settlementId, ownerPubkey, acceptedEventIds } = params
 
   const content: LockContent = {
-    status: "locked",
+    status: 'locked',
     accepted_event_ids: acceptedEventIds,
   }
 
@@ -138,7 +126,7 @@ export function createLockEvent(params: CreateLockEventParams): UnsignedEvent {
     pubkey: ownerPubkey,
     created_at: Math.floor(Date.now() / 1000),
     kind: LOCK_KIND,
-    tags: [["d", settlementId]],
+    tags: [['d', settlementId]],
     content: JSON.stringify(content),
   }
 }
@@ -152,18 +140,16 @@ function getTagValue(tags: string[][], tagName: string): string | undefined {
   return tag?.[1]
 }
 
-export function parseSettlementEvent(
-  event: NostrEvent
-): SettlementEvent | null {
+export function parseSettlementEvent(event: NostrEvent): SettlementEvent | null {
   if (event.kind !== SETTLEMENT_KIND) {
     return null
   }
 
   try {
     const parsedContent = JSON.parse(event.content) as SettlementContent
-    const settlementId = getTagValue(event.tags, "d")
-    const ownerPubkey = getTagValue(event.tags, "owner")
-    const inviteHash = getTagValue(event.tags, "invite_hash")
+    const settlementId = getTagValue(event.tags, 'd')
+    const ownerPubkey = getTagValue(event.tags, 'owner')
+    const inviteHash = getTagValue(event.tags, 'invite_hash')
 
     if (!settlementId || !ownerPubkey || !inviteHash) {
       return null
@@ -189,7 +175,7 @@ export function parseMemberEvent(event: NostrEvent): MemberEvent | null {
 
   try {
     const parsedContent = JSON.parse(event.content) as MemberContent
-    const settlementId = getTagValue(event.tags, "d")
+    const settlementId = getTagValue(event.tags, 'd')
 
     if (!settlementId) {
       return null
@@ -213,8 +199,8 @@ export function parseExpenseEvent(event: NostrEvent): ExpenseEvent | null {
 
   try {
     const parsedContent = JSON.parse(event.content) as ExpenseContent
-    const settlementId = getTagValue(event.tags, "d")
-    const cap = getTagValue(event.tags, "cap")
+    const settlementId = getTagValue(event.tags, 'd')
+    const cap = getTagValue(event.tags, 'cap')
 
     if (!settlementId || !cap) {
       return null
@@ -239,7 +225,7 @@ export function parseLockEvent(event: NostrEvent): LockEvent | null {
 
   try {
     const parsedContent = JSON.parse(event.content) as LockContent
-    const settlementId = getTagValue(event.tags, "d")
+    const settlementId = getTagValue(event.tags, 'd')
 
     if (!settlementId) {
       return null
@@ -272,10 +258,7 @@ export function validateSettlementEvent(event: SettlementEvent): boolean {
  * Validates a member event
  * - Must be signed by owner
  */
-export function validateMemberEvent(
-  event: MemberEvent,
-  ownerPubkey: string
-): boolean {
+export function validateMemberEvent(event: MemberEvent, ownerPubkey: string): boolean {
   return event.pubkey === ownerPubkey
 }
 

@@ -1,11 +1,7 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader2, Trash2, UserPlus, Users, Zap } from 'lucide-react'
+import { useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,11 +12,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Users, UserPlus, Trash2, Zap, Loader2 } from "lucide-react"
-import { isValidNpub, fetchNostrProfile } from "@/lib/nostr/index"
-import { MemberAvatar } from "./member-avatar"
-import type { Member } from "@/types/split-calculator"
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { fetchNostrProfile, isValidNpub } from '@/lib/nostr/index'
+import type { Member } from '@/types/split-calculator'
+import { MemberAvatar } from './member-avatar'
 
 interface MemberListProps {
   members: Member[]
@@ -37,9 +37,9 @@ export function MemberList({
   formatCurrency,
   getMemberPaidTotal,
 }: MemberListProps) {
-  const [addMemberMode, setAddMemberMode] = useState<"name" | "nostr">("name")
-  const [newMemberName, setNewMemberName] = useState("")
-  const [newMemberNpub, setNewMemberNpub] = useState("")
+  const [addMemberMode, setAddMemberMode] = useState<'name' | 'nostr'>('name')
+  const [newMemberName, setNewMemberName] = useState('')
+  const [newMemberNpub, setNewMemberNpub] = useState('')
   const [loadingNostr, setLoadingNostr] = useState(false)
   const [nostrError, setNostrError] = useState<string | null>(null)
 
@@ -49,7 +49,7 @@ export function MemberList({
         id: crypto.randomUUID(),
         name: newMemberName.trim(),
       })
-      setNewMemberName("")
+      setNewMemberName('')
     }
   }
 
@@ -57,12 +57,12 @@ export function MemberList({
     if (!newMemberNpub.trim()) return
 
     if (!isValidNpub(newMemberNpub.trim())) {
-      setNostrError("無効なnpubです。npub1...の形式で入力してください")
+      setNostrError('無効なnpubです。npub1...の形式で入力してください')
       return
     }
 
     if (members.some((m) => m.npub === newMemberNpub.trim())) {
-      setNostrError("このNostrユーザーは既に登録されています")
+      setNostrError('このNostrユーザーは既に登録されています')
       return
     }
 
@@ -79,20 +79,22 @@ export function MemberList({
       if (isCancelled) return
 
       if (profile) {
-        const displayName = profile.displayName || profile.name || "Nostr User"
+        const displayName = profile.displayName || profile.name || 'Nostr User'
         onAddMember({
           id: crypto.randomUUID(),
           name: displayName,
           npub: npubToFetch,
           nostrProfile: profile,
         })
-        setNewMemberNpub("")
+        setNewMemberNpub('')
       } else {
-        setNostrError("プロフィールを取得できませんでした。リレーに接続できないか、プロフィールが設定されていない可能性があります")
+        setNostrError(
+          'プロフィールを取得できませんでした。リレーに接続できないか、プロフィールが設定されていない可能性があります'
+        )
       }
     } catch {
       if (!isCancelled) {
-        setNostrError("プロフィールの取得中にエラーが発生しました")
+        setNostrError('プロフィールの取得中にエラーが発生しました')
       }
     } finally {
       if (!isCancelled) {
@@ -114,7 +116,7 @@ export function MemberList({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs value={addMemberMode} onValueChange={(v) => setAddMemberMode(v as "name" | "nostr")}>
+        <Tabs value={addMemberMode} onValueChange={(v) => setAddMemberMode(v as 'name' | 'nostr')}>
           <TabsList className="mb-4 grid w-full grid-cols-2">
             <TabsTrigger value="name">名前で追加</TabsTrigger>
             <TabsTrigger value="nostr">Nostrで追加</TabsTrigger>
@@ -130,7 +132,7 @@ export function MemberList({
                   placeholder="名前を入力"
                   value={newMemberName}
                   onChange={(e) => setNewMemberName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addMemberByName()}
+                  onKeyDown={(e) => e.key === 'Enter' && addMemberByName()}
                   className="border-2"
                   aria-describedby="member-name-hint"
                 />
@@ -163,16 +165,16 @@ export function MemberList({
                     setNewMemberNpub(e.target.value)
                     setNostrError(null)
                   }}
-                  onKeyDown={(e) => e.key === "Enter" && addMemberByNostr()}
+                  onKeyDown={(e) => e.key === 'Enter' && addMemberByNostr()}
                   className="border-2 font-mono text-sm"
-                  aria-describedby={nostrError ? "nostr-error nostr-hint" : "nostr-hint"}
-                  aria-invalid={nostrError ? "true" : undefined}
+                  aria-describedby={nostrError ? 'nostr-error nostr-hint' : 'nostr-hint'}
+                  aria-invalid={nostrError ? 'true' : undefined}
                 />
                 <Button
                   onClick={addMemberByNostr}
                   disabled={!newMemberNpub.trim() || loadingNostr}
                   className="shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
-                  aria-label={loadingNostr ? "読み込み中" : "Nostrメンバーを追加"}
+                  aria-label={loadingNostr ? '読み込み中' : 'Nostrメンバーを追加'}
                 >
                   {loadingNostr ? (
                     <Loader2 className="mr-1 h-4 w-4 animate-spin" aria-hidden="true" />
@@ -206,7 +208,9 @@ export function MemberList({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate font-medium text-foreground">{member.name}</span>
-                      {member.nostrProfile?.lud16 && <Zap className="h-4 w-4 shrink-0 text-amber-500" />}
+                      {member.nostrProfile?.lud16 && (
+                        <Zap className="h-4 w-4 shrink-0 text-amber-500" />
+                      )}
                     </div>
                     <span className="text-xs text-muted-foreground">
                       支払: {formatCurrency(getMemberPaidTotal(member.id))}
@@ -228,7 +232,8 @@ export function MemberList({
                     <AlertDialogHeader>
                       <AlertDialogTitle>メンバーを削除しますか？</AlertDialogTitle>
                       <AlertDialogDescription>
-                        {member.name}をメンバーから削除します。この操作により、このメンバーが支払った支出も削除されます。
+                        {member.name}
+                        をメンバーから削除します。この操作により、このメンバーが支払った支出も削除されます。
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

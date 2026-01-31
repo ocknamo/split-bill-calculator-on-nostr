@@ -10,12 +10,12 @@
 // Use Web Crypto API for hashing and random bytes
 function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
 async function sha256(data: Uint8Array): Promise<Uint8Array> {
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
   return new Uint8Array(hashBuffer)
 }
 

@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { AlertTriangle, Lock } from 'lucide-react'
+import { useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,11 +12,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Lock, AlertTriangle } from "lucide-react"
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface ExpenseItem {
   id: string
@@ -96,8 +96,7 @@ export function LockSettlementDialog({
             精算を確定しますか？
           </AlertDialogTitle>
           <AlertDialogDescription>
-            確定後は新しい支出を追加できなくなります。
-            承認する支出を選択してください。
+            確定後は新しい支出を追加できなくなります。 承認する支出を選択してください。
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -134,13 +133,9 @@ export function LockSettlementDialog({
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{expense.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {expense.memberName}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{expense.memberName}</p>
                     </div>
-                    <span className="shrink-0 font-mono">
-                      {formatCurrency(expense.amount)}
-                    </span>
+                    <span className="shrink-0 font-mono">{formatCurrency(expense.amount)}</span>
                   </Label>
                 </div>
               ))}

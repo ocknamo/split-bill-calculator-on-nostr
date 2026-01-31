@@ -17,7 +17,7 @@ import {
   validateExpenseEvent,
   validateMemberEvent,
   validateSettlementEvent,
-} from "./events"
+} from './events'
 import type {
   ExpenseEvent,
   LockEvent,
@@ -25,7 +25,7 @@ import type {
   MemberInfo,
   NostrEvent,
   SettlementEvent,
-} from "./events/types"
+} from './events/types'
 
 // ============================================================================
 // Types
@@ -33,7 +33,7 @@ import type {
 
 export interface InvalidExpense {
   event: ExpenseEvent
-  reason: "invalid_cap" | "invalid_member"
+  reason: 'invalid_cap' | 'invalid_member'
 }
 
 export interface ExpenseData {
@@ -95,18 +95,12 @@ export async function buildSettlementState(
   }
 
   // Step 3: Get latest valid member definition
-  const memberEvent = findLatestValidMemberEvent(
-    parsedEvents.members,
-    settlement.ownerPubkey
-  )
+  const memberEvent = findLatestValidMemberEvent(parsedEvents.members, settlement.ownerPubkey)
   const members = memberEvent?.parsedContent.members ?? []
   const validMemberPubkeys = members.map((m) => m.pubkey)
 
   // Step 4: Check for lock event
-  const lockEvent = findValidLockEvent(
-    parsedEvents.locks,
-    settlement.ownerPubkey
-  )
+  const lockEvent = findValidLockEvent(parsedEvents.locks, settlement.ownerPubkey)
   const isLocked = lockEvent !== null
 
   // Step 5: Process expense events
@@ -122,11 +116,7 @@ export async function buildSettlementState(
     for (const expense of parsedEvents.expenses) {
       if (acceptedIds.has(expense.id)) {
         // Verify the expense is still valid
-        const validation = await validateExpenseEvent(
-          expense,
-          inviteToken,
-          validMemberPubkeys
-        )
+        const validation = await validateExpenseEvent(expense, inviteToken, validMemberPubkeys)
         if (validation.isValid) {
           validExpenses.push(expense)
           foundIds.add(expense.id)
@@ -138,11 +128,7 @@ export async function buildSettlementState(
     missingEventIds = [...acceptedIds].filter((id) => !foundIds.has(id))
   } else {
     // Before lock: validate all expenses
-    const result = await categorizeExpenses(
-      parsedEvents.expenses,
-      inviteToken,
-      validMemberPubkeys
-    )
+    const result = await categorizeExpenses(parsedEvents.expenses, inviteToken, validMemberPubkeys)
     validExpenses = result.valid
     invalidExpenses = result.invalid
   }
@@ -185,10 +171,7 @@ interface CategorizedEvents {
   locks: LockEvent[]
 }
 
-function categorizeEvents(
-  events: NostrEvent[],
-  settlementId: string
-): CategorizedEvents {
+function categorizeEvents(events: NostrEvent[], settlementId: string): CategorizedEvents {
   const result: CategorizedEvents = {
     settlements: [],
     members: [],
@@ -228,9 +211,7 @@ function categorizeEvents(
   return result
 }
 
-function findValidSettlement(
-  settlements: SettlementEvent[]
-): SettlementEvent | null {
+function findValidSettlement(settlements: SettlementEvent[]): SettlementEvent | null {
   // Find the first valid settlement (should only be one per settlement_id + pubkey)
   for (const settlement of settlements) {
     if (validateSettlementEvent(settlement)) {
@@ -245,9 +226,7 @@ function findLatestValidMemberEvent(
   ownerPubkey: string
 ): MemberEvent | null {
   // Filter valid member events (signed by owner)
-  const validMembers = members.filter((m) =>
-    validateMemberEvent(m, ownerPubkey)
-  )
+  const validMembers = members.filter((m) => validateMemberEvent(m, ownerPubkey))
 
   if (validMembers.length === 0) {
     return null
@@ -259,10 +238,7 @@ function findLatestValidMemberEvent(
   )
 }
 
-function findValidLockEvent(
-  locks: LockEvent[],
-  ownerPubkey: string
-): LockEvent | null {
+function findValidLockEvent(locks: LockEvent[], ownerPubkey: string): LockEvent | null {
   // Filter valid lock events (signed by owner)
   const validLocks = locks.filter((l) => l.pubkey === ownerPubkey)
 
@@ -285,18 +261,14 @@ async function categorizeExpenses(
   const invalid: InvalidExpense[] = []
 
   for (const expense of expenses) {
-    const validation = await validateExpenseEvent(
-      expense,
-      inviteToken,
-      validMemberPubkeys
-    )
+    const validation = await validateExpenseEvent(expense, inviteToken, validMemberPubkeys)
 
     if (validation.isValid) {
       valid.push(expense)
     } else if (!validation.capValid) {
-      invalid.push({ event: expense, reason: "invalid_cap" })
+      invalid.push({ event: expense, reason: 'invalid_cap' })
     } else if (!validation.memberValid) {
-      invalid.push({ event: expense, reason: "invalid_member" })
+      invalid.push({ event: expense, reason: 'invalid_member' })
     }
   }
 

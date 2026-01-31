@@ -1,21 +1,21 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { QRCodeSVG } from "qrcode.react"
+import { Check, Copy, ExternalLink, Loader2, Zap } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
+import { useEffect, useState } from 'react'
+import { RecipientAvatar } from '@/components/recipient-avatar'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { fetchLnurlPayInfo, fetchLightningInvoice } from "@/lib/nostr/lightning"
-import { CURRENCY_SYMBOLS, SATS_PER_BTC } from "@/lib/constants"
-import { Zap, Loader2, Copy, Check, ExternalLink } from "lucide-react"
-import { RecipientAvatar } from "@/components/recipient-avatar"
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { CURRENCY_SYMBOLS, SATS_PER_BTC } from '@/lib/constants'
+import { fetchLightningInvoice, fetchLnurlPayInfo } from '@/lib/nostr/lightning'
 
 interface LightningPaymentModalProps {
   isOpen: boolean
@@ -24,7 +24,7 @@ interface LightningPaymentModalProps {
   recipientName: string
   recipientPicture?: string
   suggestedAmount: number
-  currency: "jpy" | "usd"
+  currency: 'jpy' | 'usd'
   btcPrice: { jpy: number; usd: number } | null
 }
 
@@ -55,19 +55,19 @@ export function LightningPaymentModal({
       setInvoice(null)
       setError(null)
       setCopied(false)
-      
+
       fetchLnurlPayInfo(lud16).then((info) => {
         setLnurlInfo(info)
         if (!info) {
-          setError("Lightning Addressの情報を取得できませんでした")
+          setError('Lightning Addressの情報を取得できませんでした')
         }
       })
     }
   }, [isOpen, lud16, suggestedAmount])
 
   const satsToFiat = (sats: number): string => {
-    if (!btcPrice) return "-"
-    const price = currency === "jpy" ? btcPrice.jpy : btcPrice.usd
+    if (!btcPrice) return '-'
+    const price = currency === 'jpy' ? btcPrice.jpy : btcPrice.usd
     const value = Math.round((sats / SATS_PER_BTC) * price)
     return `${CURRENCY_SYMBOLS[currency]}${value.toLocaleString()}`
   }
@@ -78,25 +78,25 @@ export function LightningPaymentModal({
     if (!lnurlInfo) return
 
     const amountNum = Number(amount)
-    
+
     // Comprehensive validation
     if (isNaN(amountNum)) {
-      setError("有効な数値を入力してください")
+      setError('有効な数値を入力してください')
       return
     }
-    
+
     if (amountNum <= 0) {
-      setError("金額は1 sats以上を入力してください")
+      setError('金額は1 sats以上を入力してください')
       return
     }
-    
+
     if (!Number.isInteger(amountNum)) {
-      setError("金額は整数で入力してください")
+      setError('金額は整数で入力してください')
       return
     }
-    
+
     if (amountNum > MAX_SATS) {
-      setError("金額が大きすぎます")
+      setError('金額が大きすぎます')
       return
     }
 
@@ -116,10 +116,10 @@ export function LightningPaymentModal({
       if (pr) {
         setInvoice(pr)
       } else {
-        setError("インボイスの生成に失敗しました")
+        setError('インボイスの生成に失敗しました')
       }
     } catch {
-      setError("インボイスの生成中にエラーが発生しました")
+      setError('インボイスの生成中にエラーが発生しました')
     } finally {
       setLoading(false)
     }
@@ -135,7 +135,7 @@ export function LightningPaymentModal({
 
   const openInWallet = () => {
     if (invoice) {
-      window.open(`lightning:${invoice}`, "_blank")
+      window.open(`lightning:${invoice}`, '_blank')
     }
   }
 
@@ -214,12 +214,7 @@ export function LightningPaymentModal({
           ) : (
             <>
               <div className="flex justify-center rounded-lg bg-card p-4">
-                <QRCodeSVG
-                  value={invoice.toUpperCase()}
-                  size={200}
-                  level="M"
-                  includeMargin
-                />
+                <QRCodeSVG value={invoice.toUpperCase()} size={200} level="M" includeMargin />
               </div>
 
               <div className="text-center">
@@ -236,7 +231,9 @@ export function LightningPaymentModal({
                   variant="outline"
                   onClick={copyInvoice}
                   className="flex-1 border-2 bg-transparent"
-                  aria-label={copied ? "インボイスをコピー済み" : "インボイスをクリップボードにコピー"}
+                  aria-label={
+                    copied ? 'インボイスをコピー済み' : 'インボイスをクリップボードにコピー'
+                  }
                 >
                   {copied ? (
                     <>

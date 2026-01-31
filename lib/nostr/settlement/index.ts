@@ -8,81 +8,77 @@
  * - State building from event collections
  */
 
-// ID generation
-export { generateSettlementId, isValidSettlementId } from "./id"
-
 // Capability (invite tokens)
 export {
-  generateInviteToken,
-  calculateInviteHash,
   calculateCap,
+  calculateInviteHash,
+  generateInviteToken,
   verifyCap,
-} from "./capability"
+} from './capability'
+// Event creation and parsing
+export {
+  createExpenseEvent,
+  createLockEvent,
+  createMemberEvent,
+  createSettlementEvent,
+  parseExpenseEvent,
+  parseLockEvent,
+  parseMemberEvent,
+  parseSettlementEvent,
+  validateExpenseEvent,
+  validateMemberEvent,
+  validateSettlementEvent,
+} from './events'
 
 // Event types
 export {
-  SETTLEMENT_KIND,
-  MEMBER_KIND,
   EXPENSE_KIND,
-  LOCK_KIND,
-  type NostrEvent,
-  type UnsignedEvent,
-  type SettlementContent,
-  type MemberContent,
-  type MemberInfo,
   type ExpenseContent,
-  type LockContent,
-  type SettlementEvent,
-  type MemberEvent,
   type ExpenseEvent,
+  LOCK_KIND,
+  type LockContent,
   type LockEvent,
-} from "./events/types"
-
-// Event creation and parsing
+  MEMBER_KIND,
+  type MemberContent,
+  type MemberEvent,
+  type MemberInfo,
+  type NostrEvent,
+  SETTLEMENT_KIND,
+  type SettlementContent,
+  type SettlementEvent,
+  type UnsignedEvent,
+} from './events/types'
+// React Hooks
 export {
-  createSettlementEvent,
-  createMemberEvent,
-  createExpenseEvent,
-  createLockEvent,
-  parseSettlementEvent,
-  parseMemberEvent,
-  parseExpenseEvent,
-  parseLockEvent,
-  validateSettlementEvent,
-  validateMemberEvent,
-  validateExpenseEvent,
-} from "./events"
-
-// State building
-export {
-  buildSettlementState,
-  type SettlementState,
-  type ExpenseData,
-  type InvalidExpense,
-} from "./state"
+  type ConnectionStatus,
+  type CreateSettlementParams,
+  type CreateSettlementResult,
+  createSettlement,
+  generateInviteLink,
+  parseInviteLink,
+  type UseInviteLinkOptions,
+  type UseInviteLinkResult,
+  type UseSettlementSyncOptions,
+  type UseSettlementSyncResult,
+  useInviteLink,
+  useSettlementSync,
+} from './hooks'
+// ID generation
+export { generateSettlementId, isValidSettlementId } from './id'
 
 // Relay communication
 export {
   createRelayClient,
   fetchSettlementEvents,
-  type RelayConfig,
   type RelayClient,
-  type SubscriptionOptions,
+  type RelayConfig,
   type Subscription,
-} from "./relay"
-
-// React Hooks
+  type SubscriptionOptions,
+} from './relay'
+// State building
 export {
-  parseInviteLink,
-  generateInviteLink,
-  useInviteLink,
-  useSettlementSync,
-  createSettlement,
-  type CreateSettlementParams,
-  type CreateSettlementResult,
-  type UseInviteLinkOptions,
-  type UseInviteLinkResult,
-  type UseSettlementSyncOptions,
-  type UseSettlementSyncResult,
-  type ConnectionStatus,
-} from "./hooks"
+  buildSettlementState,
+  type ExpenseData,
+  type InvalidExpense,
+  type SettlementState,
+} from './state'

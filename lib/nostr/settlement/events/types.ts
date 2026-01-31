@@ -68,7 +68,7 @@ export interface ExpenseContent {
 
 // Lock content (kind: 30053)
 export interface LockContent {
-  status: "locked"
+  status: 'locked'
   accepted_event_ids: string[]
 }
 

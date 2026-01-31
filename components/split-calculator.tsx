@@ -1,40 +1,36 @@
-"use client"
+'use client'
 
-import React from "react"
+import { AlertTriangle, Receipt, Users } from 'lucide-react'
+import React, { useMemo } from 'react'
+import { LightningPaymentModal } from '@/components/lightning-payment-modal'
+import { CurrencySwitcher } from '@/components/split-calculator/currency-switcher'
+import { ExpenseForm } from '@/components/split-calculator/expense-form'
+import { ExpenseList } from '@/components/split-calculator/expense-list'
+import { MemberList } from '@/components/split-calculator/member-list'
+import { PriceFooter } from '@/components/split-calculator/price-footer'
+import { SettlementList } from '@/components/split-calculator/settlement-list'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useBtcPrice } from '@/hooks/use-btc-price'
+import { useCurrency } from '@/hooks/use-currency'
+import { clearPersistedData, usePersistedState } from '@/hooks/use-persisted-state'
+import { useSettlements } from '@/hooks/use-settlements'
 
-import { useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Users, Receipt, AlertTriangle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-
-import { useBtcPrice } from "@/hooks/use-btc-price"
-import { useCurrency } from "@/hooks/use-currency"
-import { useSettlements } from "@/hooks/use-settlements"
-import { usePersistedState, clearPersistedData } from "@/hooks/use-persisted-state"
-
-import { CurrencySwitcher } from "@/components/split-calculator/currency-switcher"
-import { MemberList } from "@/components/split-calculator/member-list"
-import { ExpenseForm } from "@/components/split-calculator/expense-form"
-import { ExpenseList } from "@/components/split-calculator/expense-list"
-import { SettlementList } from "@/components/split-calculator/settlement-list"
-import { PriceFooter } from "@/components/split-calculator/price-footer"
-import { LightningPaymentModal } from "@/components/lightning-payment-modal"
-
-import type { Member, Expense, Settlement, Currency } from "@/types/split-calculator"
+import type { Currency, Expense, Member, Settlement } from '@/types/split-calculator'
 
 interface SplitCalculatorProps {
   showHeader?: boolean
 }
 
 export function SplitCalculator({ showHeader = false }: SplitCalculatorProps) {
-  const [members, setMembers, membersLoaded] = usePersistedState<Member[]>("members", [])
-  const [expenses, setExpenses, expensesLoaded] = usePersistedState<Expense[]>("expenses", [])
+  const [members, setMembers, membersLoaded] = usePersistedState<Member[]>('members', [])
+  const [expenses, setExpenses, expensesLoaded] = usePersistedState<Expense[]>('expenses', [])
   const [paidSettlementsArray, setPaidSettlementsArray] = usePersistedState<string[]>(
-    "paidSettlements",
+    'paidSettlements',
     []
   )
-  const [savedCurrency, setSavedCurrency] = usePersistedState<Currency>("currency", "jpy")
+  const [savedCurrency, setSavedCurrency] = usePersistedState<Currency>('currency', 'jpy')
 
   // Convert array to Set for easier operations
   const paidSettlements = useMemo(() => new Set(paidSettlementsArray), [paidSettlementsArray])
@@ -47,8 +43,8 @@ export function SplitCalculator({ showHeader = false }: SplitCalculatorProps) {
     amount: number
   }>({
     isOpen: false,
-    lud16: "",
-    recipientName: "",
+    lud16: '',
+    recipientName: '',
     recipientPicture: undefined,
     amount: 0,
   })
@@ -65,14 +61,8 @@ export function SplitCalculator({ showHeader = false }: SplitCalculatorProps) {
     setSavedCurrency(newCurrency)
   }
 
-  const {
-    currency,
-    setCurrency,
-    formatCurrency,
-    currencySymbol,
-    fiatToSats,
-    formatBtcPrice,
-  } = useCurrency(btcPrice, savedCurrency, handleCurrencyChange)
+  const { currency, setCurrency, formatCurrency, currencySymbol, fiatToSats, formatBtcPrice } =
+    useCurrency(btcPrice, savedCurrency, handleCurrencyChange)
 
   const { totalAmount, perPerson, settlements, getMemberPaidTotal } = useSettlements(
     members,
@@ -84,8 +74,8 @@ export function SplitCalculator({ showHeader = false }: SplitCalculatorProps) {
     if (expenses.length === 0) return null
     const currencies = new Set(expenses.map((e) => e.currency))
     if (currencies.size > 1) {
-      const jpyCount = expenses.filter((e) => e.currency === "jpy").length
-      const usdCount = expenses.filter((e) => e.currency === "usd").length
+      const jpyCount = expenses.filter((e) => e.currency === 'jpy').length
+      const usdCount = expenses.filter((e) => e.currency === 'usd').length
       return `支出に複数の通貨が混在しています (JPY: ${jpyCount}件, USD: ${usdCount}件)。精算結果は現在の通貨(${currency.toUpperCase()})で計算されます。`
     }
     return null
@@ -155,8 +145,8 @@ export function SplitCalculator({ showHeader = false }: SplitCalculatorProps) {
   }
 
   return (
-    <div className={showHeader ? "min-h-screen bg-background p-4 md:p-8" : ""}>
-      <div className={showHeader ? "mx-auto max-w-2xl" : ""}>
+    <div className={showHeader ? 'min-h-screen bg-background p-4 md:p-8' : ''}>
+      <div className={showHeader ? 'mx-auto max-w-2xl' : ''}>
         {showHeader && (
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-foreground md:text-4xl">ワリカンさん</h1>
@@ -244,9 +234,7 @@ export function SplitCalculator({ showHeader = false }: SplitCalculatorProps) {
           <Card className="border-2 border-dashed border-muted">
             <CardContent className="py-12 text-center">
               <Receipt className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <p className="mt-4 text-muted-foreground">
-                支出を追加すると精算結果が表示されます
-              </p>
+              <p className="mt-4 text-muted-foreground">支出を追加すると精算結果が表示されます</p>
             </CardContent>
           </Card>
         )}

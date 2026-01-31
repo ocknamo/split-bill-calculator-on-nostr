@@ -1,13 +1,10 @@
-"use client"
+'use client'
 
-import { useMemo, useCallback } from "react"
-import type { Member, Expense, Settlement } from "@/types/split-calculator"
+import { useCallback, useMemo } from 'react'
+import type { Expense, Member, Settlement } from '@/types/split-calculator'
 
 export function useSettlements(members: Member[], expenses: Expense[]) {
-  const totalAmount = useMemo(
-    () => expenses.reduce((sum, exp) => sum + exp.amount, 0),
-    [expenses]
-  )
+  const totalAmount = useMemo(() => expenses.reduce((sum, exp) => sum + exp.amount, 0), [expenses])
 
   const perPerson = useMemo(
     () => (members.length > 0 ? totalAmount / members.length : 0),

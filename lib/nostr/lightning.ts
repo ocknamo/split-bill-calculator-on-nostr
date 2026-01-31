@@ -1,10 +1,8 @@
-import type { LnurlPayInfo } from "@/types/nostr"
+import type { LnurlPayInfo } from '@/types/nostr'
 
-export async function fetchLnurlPayInfo(
-  lud16: string
-): Promise<LnurlPayInfo | null> {
+export async function fetchLnurlPayInfo(lud16: string): Promise<LnurlPayInfo | null> {
   try {
-    const [name, domain] = lud16.split("@")
+    const [name, domain] = lud16.split('@')
     if (!name || !domain) return null
 
     const url = `https://${domain}/.well-known/lnurlp/${name}`
@@ -20,7 +18,7 @@ export async function fetchLnurlPayInfo(
     }
     return null
   } catch (error) {
-    console.error("Failed to fetch LNURL pay info:", error)
+    console.error('Failed to fetch LNURL pay info:', error)
     return null
   }
 }
@@ -39,7 +37,7 @@ export async function fetchLightningInvoice(
     }
     return null
   } catch (error) {
-    console.error("Failed to fetch Lightning invoice:", error)
+    console.error('Failed to fetch Lightning invoice:', error)
     return null
   }
 }

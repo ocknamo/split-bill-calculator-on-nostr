@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Calculator, ArrowRight, Zap, Check } from "lucide-react"
-import { MemberAvatar } from "./member-avatar"
-import type { Member, Settlement } from "@/types/split-calculator"
+import { ArrowRight, Calculator, Check, Zap } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import type { Member, Settlement } from '@/types/split-calculator'
+import { MemberAvatar } from './member-avatar'
 
 interface SettlementListProps {
   settlements: Settlement[]
@@ -27,7 +27,7 @@ export function SettlementList({
   fiatToSats,
 }: SettlementListProps) {
   const getMember = (id: string) => members.find((m) => m.id === id)
-  const getMemberName = (id: string) => getMember(id)?.name || ""
+  const getMemberName = (id: string) => getMember(id)?.name || ''
 
   if (settlements.length === 0) return null
 
@@ -52,8 +52,8 @@ export function SettlementList({
                 key={settlement.id}
                 className={`rounded-lg border-2 p-4 transition-all ${
                   isPaid
-                    ? "border-green-500/50 bg-green-50/50 dark:bg-green-950/20"
-                    : "border-primary/30 bg-background"
+                    ? 'border-green-500/50 bg-green-50/50 dark:bg-green-950/20'
+                    : 'border-primary/30 bg-background'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -62,28 +62,28 @@ export function SettlementList({
                     checked={isPaid}
                     onCheckedChange={() => onTogglePaid(settlement.id)}
                     className="mt-1 h-5 w-5 shrink-0"
-                    aria-label={`${getMemberName(settlement.from)}から${getMemberName(settlement.to)}への${formatCurrency(settlement.amount)}の支払いを${isPaid ? "未払いに戻す" : "支払い済みにする"}`}
+                    aria-label={`${getMemberName(settlement.from)}から${getMemberName(settlement.to)}への${formatCurrency(settlement.amount)}の支払いを${isPaid ? '未払いに戻す' : '支払い済みにする'}`}
                   />
-                  <div className={`min-w-0 flex-1 ${isPaid ? "opacity-60" : ""}`}>
+                  <div className={`min-w-0 flex-1 ${isPaid ? 'opacity-60' : ''}`}>
                     <div className="flex flex-wrap items-center gap-2">
                       <div className="flex min-w-0 items-center gap-2">
                         {fromMember && <MemberAvatar member={fromMember} />}
                         <span
                           className={`truncate font-medium ${
-                            isPaid ? "line-through text-muted-foreground" : "text-foreground"
+                            isPaid ? 'line-through text-muted-foreground' : 'text-foreground'
                           }`}
                         >
                           {getMemberName(settlement.from)}
                         </span>
                       </div>
                       <ArrowRight
-                        className={`h-4 w-4 shrink-0 ${isPaid ? "text-muted-foreground" : "text-primary"}`}
+                        className={`h-4 w-4 shrink-0 ${isPaid ? 'text-muted-foreground' : 'text-primary'}`}
                       />
                       <div className="flex min-w-0 items-center gap-2">
                         {toMember && <MemberAvatar member={toMember} />}
                         <span
                           className={`truncate font-medium ${
-                            isPaid ? "line-through text-muted-foreground" : "text-primary"
+                            isPaid ? 'line-through text-muted-foreground' : 'text-primary'
                           }`}
                         >
                           {getMemberName(settlement.to)}
@@ -92,7 +92,9 @@ export function SettlementList({
                     </div>
                     <div className="mt-2 flex items-center gap-2">
                       {isPaid && <Check className="h-5 w-5 text-green-600" />}
-                      <span className={`text-xl font-bold ${isPaid ? "text-green-600" : "text-primary"}`}>
+                      <span
+                        className={`text-xl font-bold ${isPaid ? 'text-green-600' : 'text-primary'}`}
+                      >
                         {formatCurrency(settlement.amount)}
                       </span>
                     </div>

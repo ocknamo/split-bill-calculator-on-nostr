@@ -1,15 +1,15 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import type { Currency } from "@/types/split-calculator"
-import { CURRENCY_LABELS } from "@/lib/constants"
+import { Button } from '@/components/ui/button'
+import { CURRENCY_LABELS } from '@/lib/constants'
+import type { Currency } from '@/types/split-calculator'
 
 interface CurrencySwitcherProps {
   currency: Currency
   onCurrencyChange: (currency: Currency) => void
 }
 
-const currencies: Currency[] = ["jpy", "usd"]
+const currencies: Currency[] = ['jpy', 'usd']
 
 export function CurrencySwitcher({ currency, onCurrencyChange }: CurrencySwitcherProps) {
   return (
@@ -17,12 +17,12 @@ export function CurrencySwitcher({ currency, onCurrencyChange }: CurrencySwitche
       {currencies.map((c) => (
         <Button
           key={c}
-          variant={currency === c ? "default" : "ghost"}
+          variant={currency === c ? 'default' : 'ghost'}
           size="sm"
           className={`h-8 px-4 text-sm font-medium ${
             currency === c
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
           onClick={() => onCurrencyChange(c)}
         >

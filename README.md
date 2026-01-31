@@ -182,6 +182,23 @@ pnpm start
 pnpm test:run
 ```
 
+### リント・フォーマット
+
+このプロジェクトでは、コード品質とスタイルの一貫性を保つために[Biome](https://biomejs.dev/)を使用しています。
+
+```bash
+# リント実行（問題を検出）
+pnpm lint
+
+# リント実行 + 自動修正
+pnpm lint:fix
+
+# フォーマットのみ実行
+pnpm format
+```
+
+Biomeの設定は `biome.json` で管理されています。
+
 ## 使い方
 
 ### スタンドアロンモード

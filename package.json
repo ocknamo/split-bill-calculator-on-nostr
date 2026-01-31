@@ -5,7 +5,9 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "eslint .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "start": "next start",
     "test": "vitest",
     "test:run": "vitest run"
@@ -76,6 +78,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.13",
     "@tailwindcss/postcss": "^4.1.9",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/user-event": "^14.6.1",

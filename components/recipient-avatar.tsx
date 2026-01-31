@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import Image from "next/image"
+import Image from 'next/image'
+import { useState } from 'react'
 
 interface RecipientAvatarProps {
   picture?: string
@@ -15,12 +15,12 @@ export function RecipientAvatar({ picture, name, size = 48 }: RecipientAvatarPro
 
   if (picture && !imageError) {
     return (
-      <div 
+      <div
         className="relative shrink-0 overflow-hidden rounded-full border-2 border-amber-500"
         style={{ width: size, height: size }}
       >
         <Image
-          src={picture || "/placeholder.svg"}
+          src={picture || '/placeholder.svg'}
           alt={`${name}のアバター`}
           fill
           sizes={`${size}px`}
@@ -33,7 +33,7 @@ export function RecipientAvatar({ picture, name, size = 48 }: RecipientAvatarPro
   }
 
   return (
-    <div 
+    <div
       className="flex shrink-0 items-center justify-center rounded-full border-2 border-border bg-muted text-lg font-medium text-muted-foreground"
       style={{ width: size, height: size }}
       role="img"

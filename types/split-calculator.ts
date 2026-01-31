@@ -1,4 +1,4 @@
-import type { NostrProfile } from "@/types/nostr"
+import type { NostrProfile } from '@/types/nostr'
 
 export interface Member {
   id: string
@@ -22,7 +22,7 @@ export interface Settlement {
   amount: number
 }
 
-export type Currency = "jpy" | "usd"
+export type Currency = 'jpy' | 'usd'
 
 export interface BtcPrice {
   jpy: number

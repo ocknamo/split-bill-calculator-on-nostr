@@ -1,31 +1,33 @@
-"use client"
+'use client'
 
+import { type Event, finalizeEvent, generateSecretKey, getPublicKey } from 'nostr-tools'
 /**
  * Settlement同期用React Hooks
  */
-import { useState, useEffect, useCallback, useRef } from "react"
-import { generateSecretKey, getPublicKey, finalizeEvent, type Event } from "nostr-tools"
-import { createRelayClient, fetchSettlementEvents, type RelayClient, type RelayConfig } from "./relay"
-import { buildSettlementState, type SettlementState } from "./state"
-
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { DEFAULT_RELAYS } from '@/lib/constants'
 import {
   createExpenseEvent,
-  createMemberEvent,
   createLockEvent,
+  createMemberEvent,
   createSettlementEvent,
-} from "./events"
-import { DEFAULT_RELAYS } from "@/lib/constants"
+} from './events'
+import {
+  createRelayClient,
+  fetchSettlementEvents,
+  type RelayClient,
+  type RelayConfig,
+} from './relay'
+import { buildSettlementState, type SettlementState } from './state'
 
 /**
  * 招待リンクをパース
  */
-export function parseInviteLink(
-  url: string
-): { settlementId: string; inviteToken: string } | null {
+export function parseInviteLink(url: string): { settlementId: string; inviteToken: string } | null {
   try {
     const parsed = new URL(url)
-    const settlementId = parsed.searchParams.get("s")
-    const inviteToken = parsed.searchParams.get("t")
+    const settlementId = parsed.searchParams.get('s')
+    const inviteToken = parsed.searchParams.get('t')
 
     if (!settlementId || !inviteToken) {
       return null
@@ -46,8 +48,8 @@ export function generateInviteLink(
   baseUrl: string
 ): string {
   const url = new URL(baseUrl)
-  url.searchParams.set("s", settlementId)
-  url.searchParams.set("t", inviteToken)
+  url.searchParams.set('s', settlementId)
+  url.searchParams.set('t', inviteToken)
   return url.toString()
 }
 
@@ -108,14 +110,14 @@ export async function createSettlement(
 ): Promise<CreateSettlementResult> {
   const { settlementId, inviteToken, name, currency, relays = DEFAULT_RELAYS } = params
 
-  console.log("[v0] createSettlement: generating keypair")
-  
+  console.log('[v0] createSettlement: generating keypair')
+
   // Owner keypairを生成
   const sk = generateSecretKey()
   const ownerPubkey = getPublicKey(sk)
 
-  console.log("[v0] createSettlement: creating event template")
-  
+  console.log('[v0] createSettlement: creating event template')
+
   // Settlement Eventを作成
   const template = await createSettlementEvent({
     settlementId,
@@ -124,19 +126,19 @@ export async function createSettlement(
     name,
     currency,
   })
-  
-  console.log("[v0] createSettlement: finalizing event")
+
+  console.log('[v0] createSettlement: finalizing event')
   const event = finalizeEvent(template, sk)
-  console.log("[v0] createSettlement: event created", { id: event.id, kind: event.kind })
+  console.log('[v0] createSettlement: event created', { id: event.id, kind: event.kind })
 
   // Relayに発行
   const config: RelayConfig = { relays, timeout: 10000 }
   const client = createRelayClient(config)
-  
+
   try {
-    console.log("[v0] createSettlement: publishing to relays")
+    console.log('[v0] createSettlement: publishing to relays')
     await client.publish(event)
-    console.log("[v0] createSettlement: publish complete")
+    console.log('[v0] createSettlement: publish complete')
   } finally {
     client.close()
   }
@@ -157,7 +159,7 @@ export interface UseSettlementSyncOptions {
   relays?: string[]
 }
 
-export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error"
+export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error'
 
 export interface UseSettlementSyncResult {
   state: SettlementState | null
@@ -177,16 +179,14 @@ export interface UseSettlementSyncResult {
   refresh: () => Promise<void>
 }
 
-export function useSettlementSync(
-  options: UseSettlementSyncOptions
-): UseSettlementSyncResult {
+export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlementSyncResult {
   const { settlementId, inviteToken, relays = DEFAULT_RELAYS } = options
 
   const [state, setState] = useState<SettlementState | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [events, setEvents] = useState<Event[]>([])
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("connecting")
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting')
 
   // Actor keypair（一時鍵）
   const actorRef = useRef<{ sk: Uint8Array; pubkey: string } | null>(null)
@@ -198,8 +198,6 @@ export function useSettlementSync(
     const pubkey = getPublicKey(sk)
     actorRef.current = { sk, pubkey }
   }, [])
-
-  
 
   // Eventを受信して状態を更新
   const handleEvent = useCallback((event: Event) => {
@@ -221,7 +219,7 @@ export function useSettlementSync(
         const newState = await buildSettlementState(events, inviteToken, settlementId)
         setState(newState)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "State build failed")
+        setError(err instanceof Error ? err.message : 'State build failed')
       }
     }
     build()
@@ -234,22 +232,22 @@ export function useSettlementSync(
     async function init() {
       try {
         setIsLoading(true)
-        setConnectionStatus("connecting")
+        setConnectionStatus('connecting')
 
         // 既存Eventを取得
         const existingEvents = await fetchSettlementEvents(config, settlementId)
         setEvents(existingEvents)
-        
+
         // クライアントを保持（publish用）
         const client = createRelayClient(config)
         clientRef.current = client
-        
+
         setIsLoading(false)
-        setConnectionStatus("connected")
+        setConnectionStatus('connected')
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Init failed")
+        setError(err instanceof Error ? err.message : 'Init failed')
         setIsLoading(false)
-        setConnectionStatus("error")
+        setConnectionStatus('error')
       }
     }
 
@@ -262,14 +260,9 @@ export function useSettlementSync(
 
   // Expense追加
   const addExpense = useCallback(
-    async (
-      memberPubkey: string,
-      amount: number,
-      currency: string,
-      note: string
-    ) => {
+    async (memberPubkey: string, amount: number, currency: string, note: string) => {
       if (!actorRef.current || !clientRef.current) {
-        throw new Error("Not initialized")
+        throw new Error('Not initialized')
       }
 
       const { sk, pubkey } = actorRef.current
@@ -295,7 +288,7 @@ export function useSettlementSync(
   const addMember = useCallback(
     async (memberPubkey: string, name: string) => {
       if (!actorRef.current || !clientRef.current) {
-        throw new Error("Not initialized")
+        throw new Error('Not initialized')
       }
 
       const { sk, pubkey } = actorRef.current
@@ -317,7 +310,7 @@ export function useSettlementSync(
   const lockSettlement = useCallback(
     async (acceptedEventIds: string[]) => {
       if (!actorRef.current || !clientRef.current) {
-        throw new Error("Not initialized")
+        throw new Error('Not initialized')
       }
 
       const { sk, pubkey } = actorRef.current
@@ -339,23 +332,21 @@ export function useSettlementSync(
   const refresh = useCallback(async () => {
     const config: RelayConfig = { relays, timeout: 10000 }
     setIsLoading(true)
-    setConnectionStatus("connecting")
+    setConnectionStatus('connecting')
     try {
       const existingEvents = await fetchSettlementEvents(config, settlementId)
       setEvents(existingEvents)
-      setConnectionStatus("connected")
+      setConnectionStatus('connected')
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Refresh failed")
-      setConnectionStatus("error")
+      setError(err instanceof Error ? err.message : 'Refresh failed')
+      setConnectionStatus('error')
     } finally {
       setIsLoading(false)
     }
   }, [settlementId, relays])
 
   // Check if current user is owner
-  const isOwner = actorRef.current
-    ? state?.ownerPubkey === actorRef.current.pubkey
-    : false
+  const isOwner = actorRef.current ? state?.ownerPubkey === actorRef.current.pubkey : false
 
   return {
     state,

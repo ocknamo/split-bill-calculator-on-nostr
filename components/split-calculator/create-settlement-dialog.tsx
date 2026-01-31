@@ -1,7 +1,8 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Loader2, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,18 +10,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Loader2, Plus } from "lucide-react"
-import type { Currency } from "@/types/split-calculator"
+} from '@/components/ui/select'
+import type { Currency } from '@/types/split-calculator'
 
 interface CreateSettlementDialogProps {
   isOpen: boolean
@@ -28,19 +28,15 @@ interface CreateSettlementDialogProps {
   onCreate: (name: string, currency: Currency) => Promise<void>
 }
 
-export function CreateSettlementDialog({
-  isOpen,
-  onClose,
-  onCreate,
-}: CreateSettlementDialogProps) {
-  const [name, setName] = useState("")
-  const [currency, setCurrency] = useState<Currency>("jpy")
+export function CreateSettlementDialog({ isOpen, onClose, onCreate }: CreateSettlementDialogProps) {
+  const [name, setName] = useState('')
+  const [currency, setCurrency] = useState<Currency>('jpy')
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      setError("精算名を入力してください")
+      setError('精算名を入力してください')
       return
     }
 
@@ -49,11 +45,11 @@ export function CreateSettlementDialog({
 
     try {
       await onCreate(name.trim(), currency)
-      setName("")
-      setCurrency("jpy")
+      setName('')
+      setCurrency('jpy')
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "作成に失敗しました")
+      setError(err instanceof Error ? err.message : '作成に失敗しました')
     } finally {
       setIsCreating(false)
     }
@@ -61,8 +57,8 @@ export function CreateSettlementDialog({
 
   const handleClose = () => {
     if (!isCreating) {
-      setName("")
-      setCurrency("jpy")
+      setName('')
+      setCurrency('jpy')
       setError(null)
       onClose()
     }
@@ -74,8 +70,7 @@ export function CreateSettlementDialog({
         <DialogHeader>
           <DialogTitle>新規精算を作成</DialogTitle>
           <DialogDescription>
-            共同編集用の精算を作成します。
-            作成後、招待リンクを共有してメンバーを招待できます。
+            共同編集用の精算を作成します。 作成後、招待リンクを共有してメンバーを招待できます。
           </DialogDescription>
         </DialogHeader>
 
@@ -91,7 +86,7 @@ export function CreateSettlementDialog({
                 setError(null)
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !isCreating) {
+                if (e.key === 'Enter' && !isCreating) {
                   handleCreate()
                 }
               }}
@@ -124,7 +119,12 @@ export function CreateSettlementDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isCreating} className="bg-transparent">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isCreating}
+            className="bg-transparent"
+          >
             キャンセル
           </Button>
           <Button onClick={handleCreate} disabled={isCreating || !name.trim()}>

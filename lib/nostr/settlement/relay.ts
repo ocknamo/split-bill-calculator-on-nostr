@@ -2,13 +2,8 @@
  * Relay通信層
  * NostrリレーとのEvent送受信を管理
  */
-import { SimplePool, type Event, type Filter } from "nostr-tools"
-import {
-  SETTLEMENT_KIND,
-  MEMBER_KIND,
-  EXPENSE_KIND,
-  LOCK_KIND,
-} from "./events/types"
+import { type Event, type Filter, SimplePool } from 'nostr-tools'
+import { EXPENSE_KIND, LOCK_KIND, MEMBER_KIND, SETTLEMENT_KIND } from './events/types'
 
 /**
  * Relay設定
@@ -65,34 +60,25 @@ export function createRelayClient(config: RelayConfig): RelayClient {
     subscribe(options: SubscriptionOptions): Subscription {
       const { settlementId, kinds, onEvent, onEose } = options
 
-      const filterKinds = kinds ?? [
-        SETTLEMENT_KIND,
-        MEMBER_KIND,
-        EXPENSE_KIND,
-        LOCK_KIND,
-      ]
+      const filterKinds = kinds ?? [SETTLEMENT_KIND, MEMBER_KIND, EXPENSE_KIND, LOCK_KIND]
 
       const filter: Filter = {
         kinds: filterKinds,
-        "#d": [settlementId],
+        '#d': [settlementId],
       }
-      
-      console.log("[v0] Subscribing with filter:", JSON.stringify(filter))
 
-      const subCloser = pool.subscribeMany(
-        relays,
-        filter,
-        {
-          onevent(event: Event) {
-            console.log("[v0] Received event:", event.id, event.kind)
-            onEvent(event)
-          },
-          oneose() {
-            console.log("[v0] EOSE received")
-            onEose?.()
-          },
-        }
-      )
+      console.log('[v0] Subscribing with filter:', JSON.stringify(filter))
+
+      const subCloser = pool.subscribeMany(relays, filter, {
+        onevent(event: Event) {
+          console.log('[v0] Received event:', event.id, event.kind)
+          onEvent(event)
+        },
+        oneose() {
+          console.log('[v0] EOSE received')
+          onEose?.()
+        },
+      })
 
       return {
         close: () => subCloser.close(),
@@ -100,26 +86,23 @@ export function createRelayClient(config: RelayConfig): RelayClient {
     },
 
     async publish(event: Event): Promise<void> {
-      console.log("[v0] Publishing event:", { id: event.id, kind: event.kind, relays })
-      
+      console.log('[v0] Publishing event:', { id: event.id, kind: event.kind, relays })
+
       // pool.publish returns a Promise that resolves when published to all relays
       const timeout = config.timeout ?? 10000
-      
+
       try {
         // Create a timeout promise
         const timeoutPromise = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error(`Publish timeout after ${timeout}ms`)), timeout)
         )
-        
+
         // Race between publish and timeout
-        await Promise.race([
-          pool.publish(relays, event),
-          timeoutPromise
-        ])
-        
-        console.log("[v0] Publish succeeded")
+        await Promise.race([pool.publish(relays, event), timeoutPromise])
+
+        console.log('[v0] Publish succeeded')
       } catch (err) {
-        console.error("[v0] Publish failed:", err)
+        console.error('[v0] Publish failed:', err)
         throw err
       }
     },
@@ -137,21 +120,21 @@ export async function fetchSettlementEvents(
   config: RelayConfig,
   settlementId: string
 ): Promise<Event[]> {
-  console.log("[v0] fetchSettlementEvents:", settlementId)
+  console.log('[v0] fetchSettlementEvents:', settlementId)
   const pool = new SimplePool()
   const { relays } = config
 
   const filter: Filter = {
     kinds: [SETTLEMENT_KIND, MEMBER_KIND, EXPENSE_KIND, LOCK_KIND],
-    "#d": [settlementId],
+    '#d': [settlementId],
   }
 
-  console.log("[v0] Fetching with filter:", JSON.stringify(filter))
+  console.log('[v0] Fetching with filter:', JSON.stringify(filter))
 
   return new Promise((resolve, reject) => {
     const events: Event[] = []
     const timeout = config.timeout ?? 10000
-    
+
     const timeoutId = setTimeout(() => {
       sub.close()
       // Close pool after a short delay to allow pending operations to complete
@@ -159,24 +142,20 @@ export async function fetchSettlementEvents(
       resolve(events)
     }, timeout)
 
-    const sub = pool.subscribeMany(
-      relays,
-      filter,
-      {
-        onevent(event: Event) {
-          events.push(event)
-        },
-        oneose() {
-          clearTimeout(timeoutId)
-          sub.close()
-          // Close pool after a short delay to allow pending operations to complete
-          setTimeout(() => {
-            pool.close(relays)
-            console.log("[v0] Fetched", events.length, "events")
-            resolve(events)
-          }, 100)
-        },
-      }
-    )
+    const sub = pool.subscribeMany(relays, filter, {
+      onevent(event: Event) {
+        events.push(event)
+      },
+      oneose() {
+        clearTimeout(timeoutId)
+        sub.close()
+        // Close pool after a short delay to allow pending operations to complete
+        setTimeout(() => {
+          pool.close(relays)
+          console.log('[v0] Fetched', events.length, 'events')
+          resolve(events)
+        }, 100)
+      },
+    })
   })
 }

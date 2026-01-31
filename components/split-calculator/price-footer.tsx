@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { RefreshCw, AlertCircle, Clock } from "lucide-react"
+import { AlertCircle, Clock, RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface PriceFooterProps {
   formattedBtcPrice: string
@@ -41,7 +41,7 @@ export function PriceFooter({
               aria-label="価格を再取得"
             >
               <RefreshCw
-                className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
+                className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`}
                 aria-hidden="true"
               />
               再試行
@@ -59,7 +59,7 @@ export function PriceFooter({
               aria-label="価格を更新"
             >
               <RefreshCw
-                className={`h-3 w-3 ${loading ? "animate-spin" : ""}`}
+                className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`}
                 aria-hidden="true"
               />
               更新

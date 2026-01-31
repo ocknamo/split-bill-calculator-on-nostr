@@ -1,6 +1,6 @@
 // Re-export all nostr utilities
-export { isValidNpub, npubToHex, fetchNostrProfile } from "./profile"
-export { fetchLnurlPayInfo, fetchLightningInvoice } from "./lightning"
 
 // Re-export types
-export type { NostrProfile, LnurlPayInfo } from "@/types/nostr"
+export type { LnurlPayInfo, NostrProfile } from '@/types/nostr'
+export { fetchLightningInvoice, fetchLnurlPayInfo } from './lightning'
+export { fetchNostrProfile, isValidNpub, npubToHex } from './profile'

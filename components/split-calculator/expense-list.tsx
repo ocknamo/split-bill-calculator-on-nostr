@@ -1,7 +1,6 @@
-"use client"
+'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Trash2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,11 +11,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Trash2 } from "lucide-react"
-import { MemberAvatar } from "./member-avatar"
-import type { Member, Expense, Currency } from "@/types/split-calculator"
-import { Badge } from "@/components/ui/badge"
+} from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { Currency, Expense, Member } from '@/types/split-calculator'
+import { MemberAvatar } from './member-avatar'
 
 interface ExpenseListProps {
   expenses: Expense[]
@@ -34,7 +34,7 @@ export function ExpenseList({
   formatCurrency,
 }: ExpenseListProps) {
   const getMember = (id: string) => members.find((m) => m.id === id)
-  const getMemberName = (id: string) => getMember(id)?.name || ""
+  const getMemberName = (id: string) => getMember(id)?.name || ''
 
   if (expenses.length === 0) return null
 
@@ -83,7 +83,8 @@ export function ExpenseList({
                     <AlertDialogHeader>
                       <AlertDialogTitle>支出を削除しますか？</AlertDialogTitle>
                       <AlertDialogDescription>
-                        「{expense.description}」（{formatCurrency(expense.amount)}）を削除します。この操作は取り消せません。
+                        「{expense.description}」（{formatCurrency(expense.amount)}
+                        ）を削除します。この操作は取り消せません。
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
