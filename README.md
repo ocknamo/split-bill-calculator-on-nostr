@@ -179,9 +179,6 @@ pnpm start
 
 ```bash
 # テストを実行
-pnpm test
-
-# テストを監視モードで実行
 pnpm test:run
 ```
 
