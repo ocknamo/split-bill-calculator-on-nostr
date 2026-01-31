@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest"
 import { render, screen, fireEvent } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { SyncModeSelector } from "../sync-mode-selector"
 
 // Mock next/navigation
@@ -25,8 +26,9 @@ describe("SyncModeSelector", () => {
     expect(screen.getByText("共同編集")).toBeInTheDocument()
   })
 
-  it("calls onModeChange when mode is switched", () => {
+  it("calls onModeChange when mode is switched", async () => {
     const onModeChange = vi.fn()
+    const user = userEvent.setup()
     render(
       <SyncModeSelector
         mode="standalone"
@@ -35,7 +37,8 @@ describe("SyncModeSelector", () => {
       />
     )
 
-    fireEvent.click(screen.getByText("共同編集"))
+    const syncTab = screen.getByRole("tab", { name: /共同編集/i })
+    await user.click(syncTab)
     expect(onModeChange).toHaveBeenCalledWith("sync")
   })
 

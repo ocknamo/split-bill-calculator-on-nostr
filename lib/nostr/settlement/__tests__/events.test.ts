@@ -22,12 +22,12 @@ import {
 } from "../events/types"
 
 describe("createSettlementEvent", () => {
-  it("should create an unsigned settlement event with correct structure", () => {
+  it("should create an unsigned settlement event with correct structure", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const ownerPubkey = "owner_pubkey_hex"
 
-    const event = createSettlementEvent({
+    const event = await createSettlementEvent({
       settlementId,
       inviteToken,
       ownerPubkey,
@@ -49,7 +49,7 @@ describe("createSettlementEvent", () => {
 
     const inviteHashTag = event.tags.find((t) => t[0] === "invite_hash")
     expect(inviteHashTag).toBeDefined()
-    expect(inviteHashTag?.[1]).toBe(calculateInviteHash(inviteToken))
+    expect(inviteHashTag?.[1]).toBe(await calculateInviteHash(inviteToken))
 
     // Check content
     const content = JSON.parse(event.content)
@@ -87,13 +87,13 @@ describe("createMemberEvent", () => {
 })
 
 describe("createExpenseEvent", () => {
-  it("should create an unsigned expense event with cap tag", () => {
+  it("should create an unsigned expense event with cap tag", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const actorPubkey = "actor_pubkey_hex"
     const memberPubkey = "member_pubkey_hex"
 
-    const event = createExpenseEvent({
+    const event = await createExpenseEvent({
       settlementId,
       inviteToken,
       actorPubkey,
@@ -112,7 +112,7 @@ describe("createExpenseEvent", () => {
 
     const capTag = event.tags.find((t) => t[0] === "cap")
     expect(capTag).toBeDefined()
-    expect(capTag?.[1]).toBe(calculateCap(inviteToken, actorPubkey))
+    expect(capTag?.[1]).toBe(await calculateCap(inviteToken, actorPubkey))
 
     // Check content
     const content = JSON.parse(event.content)
@@ -122,11 +122,11 @@ describe("createExpenseEvent", () => {
     expect(content.note).toBe("Day 1 dinner")
   })
 
-  it("should allow negative amounts for corrections", () => {
+  it("should allow negative amounts for corrections", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
 
-    const event = createExpenseEvent({
+    const event = await createExpenseEvent({
       settlementId,
       inviteToken,
       actorPubkey: "actor",
@@ -168,12 +168,12 @@ describe("createLockEvent", () => {
 })
 
 describe("parseSettlementEvent", () => {
-  it("should parse a valid settlement event", () => {
+  it("should parse a valid settlement event", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const ownerPubkey = "owner_pubkey_hex"
 
-    const unsigned = createSettlementEvent({
+    const unsigned = await createSettlementEvent({
       settlementId,
       inviteToken,
       ownerPubkey,
@@ -192,7 +192,7 @@ describe("parseSettlementEvent", () => {
     expect(parsed).not.toBeNull()
     expect(parsed?.settlementId).toBe(settlementId)
     expect(parsed?.ownerPubkey).toBe(ownerPubkey)
-    expect(parsed?.inviteHash).toBe(calculateInviteHash(inviteToken))
+    expect(parsed?.inviteHash).toBe(await calculateInviteHash(inviteToken))
     expect(parsed?.parsedContent.name).toBe("Trip")
     expect(parsed?.parsedContent.currency).toBe("JPY")
   })
@@ -212,12 +212,12 @@ describe("parseSettlementEvent", () => {
 })
 
 describe("validateSettlementEvent", () => {
-  it("should return true when pubkey matches owner tag", () => {
+  it("should return true when pubkey matches owner tag", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const ownerPubkey = "owner_pubkey_hex"
 
-    const unsigned = createSettlementEvent({
+    const unsigned = await createSettlementEvent({
       settlementId,
       inviteToken,
       ownerPubkey,
@@ -231,12 +231,12 @@ describe("validateSettlementEvent", () => {
     expect(validateSettlementEvent(parsed!)).toBe(true)
   })
 
-  it("should return false when pubkey does not match owner tag", () => {
+  it("should return false when pubkey does not match owner tag", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const ownerPubkey = "owner_pubkey_hex"
 
-    const unsigned = createSettlementEvent({
+    const unsigned = await createSettlementEvent({
       settlementId,
       inviteToken,
       ownerPubkey,
@@ -287,13 +287,13 @@ describe("validateMemberEvent", () => {
 })
 
 describe("validateExpenseEvent", () => {
-  it("should return true for valid cap and member", () => {
+  it("should return true for valid cap and member", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const actorPubkey = "actor_pubkey"
     const memberPubkey = "member_pubkey"
 
-    const unsigned = createExpenseEvent({
+    const unsigned = await createExpenseEvent({
       settlementId,
       inviteToken,
       actorPubkey,
@@ -307,21 +307,21 @@ describe("validateExpenseEvent", () => {
     const parsed = parseExpenseEvent(signedEvent)
     const validMembers = [memberPubkey]
 
-    expect(validateExpenseEvent(parsed!, inviteToken, validMembers)).toEqual({
+    expect(await validateExpenseEvent(parsed!, inviteToken, validMembers)).toEqual({
       isValid: true,
       capValid: true,
       memberValid: true,
     })
   })
 
-  it("should return capValid=false for invalid cap", () => {
+  it("should return capValid=false for invalid cap", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const wrongToken = generateInviteToken()
     const actorPubkey = "actor_pubkey"
     const memberPubkey = "member_pubkey"
 
-    const unsigned = createExpenseEvent({
+    const unsigned = await createExpenseEvent({
       settlementId,
       inviteToken,
       actorPubkey,
@@ -336,20 +336,20 @@ describe("validateExpenseEvent", () => {
     const validMembers = [memberPubkey]
 
     // Validate with wrong token
-    expect(validateExpenseEvent(parsed!, wrongToken, validMembers)).toEqual({
+    expect(await validateExpenseEvent(parsed!, wrongToken, validMembers)).toEqual({
       isValid: false,
       capValid: false,
       memberValid: true,
     })
   })
 
-  it("should return memberValid=false for unknown member", () => {
+  it("should return memberValid=false for unknown member", async () => {
     const settlementId = generateSettlementId()
     const inviteToken = generateInviteToken()
     const actorPubkey = "actor_pubkey"
     const memberPubkey = "unknown_member"
 
-    const unsigned = createExpenseEvent({
+    const unsigned = await createExpenseEvent({
       settlementId,
       inviteToken,
       actorPubkey,
@@ -363,7 +363,7 @@ describe("validateExpenseEvent", () => {
     const parsed = parseExpenseEvent(signedEvent)
     const validMembers = ["other_member"]
 
-    expect(validateExpenseEvent(parsed!, inviteToken, validMembers)).toEqual({
+    expect(await validateExpenseEvent(parsed!, inviteToken, validMembers)).toEqual({
       isValid: false,
       capValid: true,
       memberValid: false,

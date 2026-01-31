@@ -10,7 +10,7 @@ import {
   type RelayConfig,
   type SubscriptionOptions,
 } from "../relay"
-import { SETTLEMENT_EVENT_KINDS } from "../events/types"
+import { SETTLEMENT_KIND, MEMBER_KIND, EXPENSE_KIND, LOCK_KIND } from "../events/types"
 
 // モックSimplePool
 const mockPool = {
@@ -71,24 +71,21 @@ describe("RelayClient", () => {
 
       const sub = client.subscribe(options)
 
-      expect(mockPool.subscribeMany).toHaveBeenCalledWith(
-        defaultConfig.relays,
-        [
-          {
-            kinds: [
-              SETTLEMENT_EVENT_KINDS.SETTLEMENT,
-              SETTLEMENT_EVENT_KINDS.MEMBER,
-              SETTLEMENT_EVENT_KINDS.EXPENSE,
-              SETTLEMENT_EVENT_KINDS.LOCK,
-            ],
-            "#d": [settlementId],
-          },
+      const calls = mockPool.subscribeMany.mock.calls[0]
+      expect(calls[0]).toEqual(defaultConfig.relays)
+      expect(calls[1]).toEqual({
+        kinds: [
+          SETTLEMENT_KIND,
+          MEMBER_KIND,
+          EXPENSE_KIND,
+          LOCK_KIND,
         ],
-        expect.objectContaining({
-          onevent: expect.any(Function),
-          oneose: expect.any(Function),
-        })
-      )
+        "#d": [settlementId],
+      })
+      expect(calls[2]).toHaveProperty('onevent')
+      expect(calls[2]).toHaveProperty('oneose')
+      expect(typeof calls[2].onevent).toBe('function')
+      expect(typeof calls[2].oneose).toBe('function')
 
       expect(sub).toBeDefined()
       expect(sub.close).toBeDefined()
@@ -101,18 +98,16 @@ describe("RelayClient", () => {
 
       client.subscribe({
         settlementId,
-        kinds: [SETTLEMENT_EVENT_KINDS.EXPENSE],
+        kinds: [EXPENSE_KIND],
         onEvent: vi.fn(),
       })
 
       expect(mockPool.subscribeMany).toHaveBeenCalledWith(
         defaultConfig.relays,
-        [
-          {
-            kinds: [SETTLEMENT_EVENT_KINDS.EXPENSE],
-            "#d": [settlementId],
-          },
-        ],
+        {
+          kinds: [EXPENSE_KIND],
+          "#d": [settlementId],
+        },
         expect.any(Object)
       )
     })
@@ -136,7 +131,7 @@ describe("RelayClient", () => {
         id: "event-id",
         pubkey: "pubkey",
         created_at: Math.floor(Date.now() / 1000),
-        kind: SETTLEMENT_EVENT_KINDS.EXPENSE,
+        kind: EXPENSE_KIND,
         tags: [["d", "test-id"]],
         content: "{}",
         sig: "sig",
@@ -173,7 +168,7 @@ describe("RelayClient", () => {
         id: "event-id",
         pubkey: "pubkey",
         created_at: Math.floor(Date.now() / 1000),
-        kind: SETTLEMENT_EVENT_KINDS.EXPENSE,
+        kind: EXPENSE_KIND,
         tags: [["d", "test-id"]],
         content: "{}",
         sig: "sig",
@@ -191,7 +186,7 @@ describe("RelayClient", () => {
         id: "event-id",
         pubkey: "pubkey",
         created_at: Math.floor(Date.now() / 1000),
-        kind: SETTLEMENT_EVENT_KINDS.EXPENSE,
+        kind: EXPENSE_KIND,
         tags: [],
         content: "{}",
         sig: "sig",
@@ -221,7 +216,7 @@ describe("fetchSettlementEvents", () => {
         id: "event-1",
         pubkey: "pubkey",
         created_at: 1000,
-        kind: SETTLEMENT_EVENT_KINDS.SETTLEMENT,
+        kind: SETTLEMENT_KIND,
         tags: [["d", "settlement-id"]],
         content: "{}",
         sig: "sig",
@@ -230,7 +225,7 @@ describe("fetchSettlementEvents", () => {
         id: "event-2",
         pubkey: "pubkey",
         created_at: 1001,
-        kind: SETTLEMENT_EVENT_KINDS.MEMBER,
+        kind: MEMBER_KIND,
         tags: [["d", "settlement-id"]],
         content: "{}",
         sig: "sig",

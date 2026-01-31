@@ -81,7 +81,7 @@ export function createRelayClient(config: RelayConfig): RelayClient {
 
       const subCloser = pool.subscribeMany(
         relays,
-        [filter],
+        filter,
         {
           onevent(event: Event) {
             console.log("[v0] Received event:", event.id, event.kind)
@@ -102,33 +102,24 @@ export function createRelayClient(config: RelayConfig): RelayClient {
     async publish(event: Event): Promise<void> {
       console.log("[v0] Publishing event:", { id: event.id, kind: event.kind, relays })
       
-      // pool.publish returns an array of Promises, one for each relay
-      // We need to wait for at least one to succeed
+      // pool.publish returns a Promise that resolves when published to all relays
       const timeout = config.timeout ?? 10000
       
-      // Wrap each relay promise with a timeout
-      const publishPromises = pool.publish(relays, event).map((promise, i) =>
-        Promise.race([
-          promise.then(() => {
-            console.log("[v0] Published to relay:", relays[i])
-            return relays[i]
-          }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error(`Timeout: ${relays[i]}`)), timeout)
-          ),
-        ])
-      )
-
       try {
-        // Wait for at least one relay to accept
-        const successRelay = await Promise.any(publishPromises)
-        console.log("[v0] Publish succeeded via:", successRelay)
+        // Create a timeout promise
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Publish timeout after ${timeout}ms`)), timeout)
+        )
+        
+        // Race between publish and timeout
+        await Promise.race([
+          pool.publish(relays, event),
+          timeoutPromise
+        ])
+        
+        console.log("[v0] Publish succeeded")
       } catch (err) {
-        console.error("[v0] All relays failed:", err)
-        // All relays failed
-        if (err instanceof AggregateError) {
-          throw new Error(`Failed to publish to any relay: ${err.errors.map((e) => e.message).join(", ")}`)
-        }
+        console.error("[v0] Publish failed:", err)
         throw err
       }
     },
@@ -155,17 +146,37 @@ export async function fetchSettlementEvents(
     "#d": [settlementId],
   }
 
-  console.log("[v0] querySync with filter:", JSON.stringify(filter))
+  console.log("[v0] Fetching with filter:", JSON.stringify(filter))
 
-  try {
-    // Use querySync for simpler one-time fetch
-    const events = await pool.querySync(relays, filter)
-    console.log("[v0] querySync got", events.length, "events")
-    return events
-  } catch (err) {
-    console.error("[v0] querySync error:", err)
-    return []
-  } finally {
-    pool.close(relays)
-  }
+  return new Promise((resolve, reject) => {
+    const events: Event[] = []
+    const timeout = config.timeout ?? 10000
+    
+    const timeoutId = setTimeout(() => {
+      sub.close()
+      // Close pool after a short delay to allow pending operations to complete
+      setTimeout(() => pool.close(relays), 100)
+      resolve(events)
+    }, timeout)
+
+    const sub = pool.subscribeMany(
+      relays,
+      filter,
+      {
+        onevent(event: Event) {
+          events.push(event)
+        },
+        oneose() {
+          clearTimeout(timeoutId)
+          sub.close()
+          // Close pool after a short delay to allow pending operations to complete
+          setTimeout(() => {
+            pool.close(relays)
+            console.log("[v0] Fetched", events.length, "events")
+            resolve(events)
+          }, 100)
+        },
+      }
+    )
+  })
 }

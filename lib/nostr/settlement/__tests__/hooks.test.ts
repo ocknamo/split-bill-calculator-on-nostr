@@ -90,7 +90,7 @@ describe("generateInviteLink", () => {
     const settlementId = "settlement-123"
     const inviteToken = "token-abc"
 
-    const result = generateInviteLink(baseUrl, settlementId, inviteToken)
+    const result = generateInviteLink(settlementId, inviteToken, baseUrl)
 
     expect(result).toBe("https://example.com/join?s=settlement-123&t=token-abc")
   })
@@ -100,7 +100,7 @@ describe("generateInviteLink", () => {
     const settlementId = "settlement/123"
     const inviteToken = "token+abc"
 
-    const result = generateInviteLink(baseUrl, settlementId, inviteToken)
+    const result = generateInviteLink(settlementId, inviteToken, baseUrl)
 
     expect(result).toContain("settlement%2F123")
     expect(result).toContain("token%2Babc")

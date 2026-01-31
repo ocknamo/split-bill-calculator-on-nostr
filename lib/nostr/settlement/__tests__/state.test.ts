@@ -14,9 +14,9 @@ import { generateInviteToken } from "../capability"
 import type { NostrEvent } from "../events/types"
 
 // Helper to create a mock signed event
-function mockSign(unsigned: ReturnType<typeof createSettlementEvent>, id: string): NostrEvent {
+async function mockSign(unsigned: Awaited<ReturnType<typeof createSettlementEvent>> | ReturnType<typeof createMemberEvent> | Awaited<ReturnType<typeof createExpenseEvent>> | ReturnType<typeof createLockEvent>, id: string): Promise<NostrEvent> {
   return {
-    ...unsigned,
+    ...(await Promise.resolve(unsigned)),
     id,
     sig: "mock_signature",
   }
@@ -29,9 +29,9 @@ describe("buildSettlementState", () => {
   const member1Pubkey = "member1_pubkey"
   const member2Pubkey = "member2_pubkey"
 
-  function createTestEvents() {
-    const settlementEvent = mockSign(
-      createSettlementEvent({
+  async function createTestEvents() {
+    const settlementEvent = await mockSign(
+      await createSettlementEvent({
         settlementId,
         inviteToken,
         ownerPubkey,
@@ -41,7 +41,7 @@ describe("buildSettlementState", () => {
       "settlement_event_id"
     )
 
-    const memberEvent = mockSign(
+    const memberEvent = await mockSign(
       createMemberEvent({
         settlementId,
         ownerPubkey,
@@ -53,8 +53,8 @@ describe("buildSettlementState", () => {
       "member_event_id"
     )
 
-    const expense1 = mockSign(
-      createExpenseEvent({
+    const expense1 = await mockSign(
+      await createExpenseEvent({
         settlementId,
         inviteToken,
         actorPubkey: ownerPubkey,
@@ -66,8 +66,8 @@ describe("buildSettlementState", () => {
       "expense1_id"
     )
 
-    const expense2 = mockSign(
-      createExpenseEvent({
+    const expense2 = await mockSign(
+      await createExpenseEvent({
         settlementId,
         inviteToken,
         actorPubkey: ownerPubkey,
@@ -82,11 +82,11 @@ describe("buildSettlementState", () => {
     return { settlementEvent, memberEvent, expense1, expense2 }
   }
 
-  it("should build state from valid events (before lock)", () => {
-    const { settlementEvent, memberEvent, expense1, expense2 } = createTestEvents()
+  it("should build state from valid events (before lock)", async () => {
+    const { settlementEvent, memberEvent, expense1, expense2 } = await createTestEvents()
     const events = [settlementEvent, memberEvent, expense1, expense2]
 
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state).not.toBeNull()
     expect(state?.settlement?.parsedContent.name).toBe("Test Trip")
@@ -96,22 +96,22 @@ describe("buildSettlementState", () => {
     expect(state?.isLocked).toBe(false)
   })
 
-  it("should return null if settlement event is missing", () => {
-    const { memberEvent, expense1 } = createTestEvents()
+  it("should return null if settlement event is missing", async () => {
+    const { memberEvent, expense1 } = await createTestEvents()
     const events = [memberEvent, expense1]
 
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state).toBeNull()
   })
 
-  it("should filter out expenses with invalid cap", () => {
-    const { settlementEvent, memberEvent, expense1 } = createTestEvents()
+  it("should filter out expenses with invalid cap", async () => {
+    const { settlementEvent, memberEvent, expense1 } = await createTestEvents()
     
     // Create expense with wrong cap (different token)
     const wrongToken = generateInviteToken()
-    const invalidExpense = mockSign(
-      createExpenseEvent({
+    const invalidExpense = await mockSign(
+      await createExpenseEvent({
         settlementId,
         inviteToken: wrongToken, // wrong token
         actorPubkey: "attacker_pubkey",
@@ -124,19 +124,19 @@ describe("buildSettlementState", () => {
     )
 
     const events = [settlementEvent, memberEvent, expense1, invalidExpense]
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state?.validExpenses).toHaveLength(1)
     expect(state?.invalidExpenses).toHaveLength(1)
     expect(state?.invalidExpenses[0].reason).toBe("invalid_cap")
   })
 
-  it("should mark expenses with unknown member as pending", () => {
-    const { settlementEvent, memberEvent, expense1 } = createTestEvents()
+  it("should mark expenses with unknown member as pending", async () => {
+    const { settlementEvent, memberEvent, expense1 } = await createTestEvents()
     
     // Create expense for unknown member
-    const unknownMemberExpense = mockSign(
-      createExpenseEvent({
+    const unknownMemberExpense = await mockSign(
+      await createExpenseEvent({
         settlementId,
         inviteToken,
         actorPubkey: ownerPubkey,
@@ -149,17 +149,17 @@ describe("buildSettlementState", () => {
     )
 
     const events = [settlementEvent, memberEvent, expense1, unknownMemberExpense]
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state?.validExpenses).toHaveLength(1)
     expect(state?.invalidExpenses).toHaveLength(1)
     expect(state?.invalidExpenses[0].reason).toBe("invalid_member")
   })
 
-  it("should only include accepted events after lock", () => {
-    const { settlementEvent, memberEvent, expense1, expense2 } = createTestEvents()
+  it("should only include accepted events after lock", async () => {
+    const { settlementEvent, memberEvent, expense1, expense2 } = await createTestEvents()
 
-    const lockEvent = mockSign(
+    const lockEvent = await mockSign(
       createLockEvent({
         settlementId,
         ownerPubkey,
@@ -169,7 +169,7 @@ describe("buildSettlementState", () => {
     )
 
     const events = [settlementEvent, memberEvent, expense1, expense2, lockEvent]
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state?.isLocked).toBe(true)
     expect(state?.validExpenses).toHaveLength(1)
@@ -178,10 +178,10 @@ describe("buildSettlementState", () => {
     expect(state?.invalidExpenses).toHaveLength(0)
   })
 
-  it("should warn about missing accepted events after lock", () => {
-    const { settlementEvent, memberEvent, expense1 } = createTestEvents()
+  it("should warn about missing accepted events after lock", async () => {
+    const { settlementEvent, memberEvent, expense1 } = await createTestEvents()
 
-    const lockEvent = mockSign(
+    const lockEvent = await mockSign(
       createLockEvent({
         settlementId,
         ownerPubkey,
@@ -191,31 +191,31 @@ describe("buildSettlementState", () => {
     )
 
     const events = [settlementEvent, memberEvent, expense1, lockEvent]
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state?.isLocked).toBe(true)
     expect(state?.missingEventIds).toContain("missing_event_id")
   })
 
-  it("should use latest member event (parameterized replaceable)", () => {
-    const { settlementEvent, expense1 } = createTestEvents()
+  it("should use latest member event (parameterized replaceable)", async () => {
+    const { settlementEvent, expense1 } = await createTestEvents()
 
     // First member event
     const memberEvent1 = {
-      ...mockSign(
+      ...(await mockSign(
         createMemberEvent({
           settlementId,
           ownerPubkey,
           members: [{ pubkey: member1Pubkey, name: "Old Name" }],
         }),
         "member_event_1"
-      ),
+      )),
       created_at: 1000,
     }
 
     // Second member event (newer)
     const memberEvent2 = {
-      ...mockSign(
+      ...(await mockSign(
         createMemberEvent({
           settlementId,
           ownerPubkey,
@@ -225,22 +225,22 @@ describe("buildSettlementState", () => {
           ],
         }),
         "member_event_2"
-      ),
+      )),
       created_at: 2000,
     }
 
     const events = [settlementEvent, memberEvent1, memberEvent2, expense1]
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state?.members).toHaveLength(2)
     expect(state?.members.find((m) => m.pubkey === member1Pubkey)?.name).toBe("New Name")
   })
 
-  it("should ignore member event not signed by owner", () => {
-    const { settlementEvent, expense1 } = createTestEvents()
+  it("should ignore member event not signed by owner", async () => {
+    const { settlementEvent, expense1 } = await createTestEvents()
 
     // Attacker tries to add themselves as member
-    const attackerMemberEvent = mockSign(
+    const attackerMemberEvent = await mockSign(
       createMemberEvent({
         settlementId,
         ownerPubkey: "attacker_pubkey", // wrong signer
@@ -249,7 +249,7 @@ describe("buildSettlementState", () => {
       "attacker_member_event"
     )
 
-    const validMemberEvent = mockSign(
+    const validMemberEvent = await mockSign(
       createMemberEvent({
         settlementId,
         ownerPubkey,
@@ -259,7 +259,7 @@ describe("buildSettlementState", () => {
     )
 
     const events = [settlementEvent, attackerMemberEvent, validMemberEvent, expense1]
-    const state = buildSettlementState(events, inviteToken, settlementId)
+    const state = await buildSettlementState(events, inviteToken, settlementId)
 
     expect(state?.members).toHaveLength(1)
     expect(state?.members[0].pubkey).toBe(member1Pubkey)
