@@ -37,11 +37,66 @@ if [ ! -d "node_modules" ]; then
     echo ""
 fi
 
-# アプリケーションを起動
+# アプリケーションをバックグラウンドで起動
 echo "[INFO] 開発サーバーを起動中..."
 echo "   URL: http://localhost:$PORT"
 echo ""
-echo "停止するには Ctrl+C を押してください"
+
+# ログディレクトリを作成
+LOG_DIR="$PROJECT_DIR/log"
+mkdir -p "$LOG_DIR"
+
+# バックグラウンドでサーバーを起動し、ログファイルに出力
+LOG_FILE="$LOG_DIR/dev-server.log"
+pnpm dev > "$LOG_FILE" 2>&1 &
+SERVER_PID=$!
+
+echo "[INFO] サーバーをバックグラウンドで起動しました（PID: $SERVER_PID）"
+echo "[INFO] ログファイル: $LOG_FILE"
 echo ""
 
-pnpm dev
+# サーバーが起動するまで待機（最大30秒）
+echo "[INFO] サーバーの起動を待機中..."
+MAX_WAIT=30
+ELAPSED=0
+
+while [ $ELAPSED -lt $MAX_WAIT ]; do
+    # curlでヘルスチェック
+    if curl -s -o /dev/null -w "%{http_code}" http://localhost:$PORT 2>/dev/null | grep -q "200\|301\|302\|404"; then
+        echo "[OK] サーバーが起動しました！"
+        echo ""
+        echo "=========================================="
+        echo "開発サーバーが正常に起動しました"
+        echo "URL: http://localhost:$PORT"
+        echo "PID: $SERVER_PID"
+        echo "ログ: $LOG_FILE"
+        echo "=========================================="
+        echo ""
+        echo "サーバーを停止するには: kill $SERVER_PID"
+        echo ""
+        exit 0
+    fi
+    
+    # プロセスが終了していないかチェック
+    if ! ps -p $SERVER_PID > /dev/null 2>&1; then
+        echo "[ERROR] サーバープロセスが予期せず終了しました"
+        echo ""
+        echo "ログの最後の10行:"
+        tail -n 10 "$LOG_FILE"
+        exit 1
+    fi
+    
+    sleep 1
+    ELAPSED=$((ELAPSED + 1))
+    echo -n "."
+done
+
+echo ""
+echo "[ERROR] サーバーの起動がタイムアウトしました（${MAX_WAIT}秒）"
+echo ""
+echo "ログの最後の20行:"
+tail -n 20 "$LOG_FILE"
+echo ""
+echo "サーバープロセスを停止します..."
+kill $SERVER_PID 2>/dev/null
+exit 1
