@@ -154,7 +154,7 @@ const latest = events.reduce((latest, current) =>
 `lib/nostr/settlement/__tests__/`にテストファイルがあります。
 
 ```bash
-pnpm test
+pnpm test:run
 ```
 
 **テスト対象**:
