@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertTriangle, ArrowLeft, Receipt, Users } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { LightningPaymentModal } from '@/components/lightning-payment-modal'
 import { CurrencySwitcher } from '@/components/split-calculator/currency-switcher'
 import { ExpenseForm } from '@/components/split-calculator/expense-form'
@@ -196,7 +196,7 @@ export function SplitCalculatorSync({
     [addMember]
   )
 
-  const handleRemoveMember = useCallback((id: string) => {
+  const handleRemoveMember = useCallback((_id: string) => {
     // In sync mode, we cannot remove members (append-only)
     console.warn('Cannot remove members in sync mode')
   }, [])
@@ -213,7 +213,7 @@ export function SplitCalculatorSync({
     [addExpense]
   )
 
-  const handleRemoveExpense = useCallback((id: string) => {
+  const handleRemoveExpense = useCallback((_id: string) => {
     // In sync mode, we cannot remove expenses (append-only)
     // Instead, add a negative expense for correction
     console.warn('Cannot remove expenses in sync mode. Use negative amount for corrections.')

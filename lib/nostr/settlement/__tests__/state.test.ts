@@ -8,7 +8,7 @@ import {
 } from '../events'
 import type { NostrEvent } from '../events/types'
 import { generateSettlementId } from '../id'
-import { buildSettlementState, type SettlementState } from '../state'
+import { buildSettlementState } from '../state'
 
 // Helper to create a mock signed event
 async function mockSign(

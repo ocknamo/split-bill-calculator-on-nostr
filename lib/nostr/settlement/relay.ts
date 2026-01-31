@@ -131,7 +131,7 @@ export async function fetchSettlementEvents(
 
   console.log('[v0] Fetching with filter:', JSON.stringify(filter))
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const events: Event[] = []
     const timeout = config.timeout ?? 10000
 

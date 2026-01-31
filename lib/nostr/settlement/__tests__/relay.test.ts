@@ -232,10 +232,12 @@ describe('fetchSettlementEvents', () => {
       close: vi.fn(),
     }
 
-    mockPool.subscribeMany.mockImplementation((relays, filters, callbacks) => {
+    mockPool.subscribeMany.mockImplementation((_relays, _filters, callbacks) => {
       // 非同期でイベントを送信
       setTimeout(() => {
-        mockEvents.forEach((event) => callbacks.onevent(event))
+        for (const event of mockEvents) {
+          callbacks.onevent(event)
+        }
         callbacks.oneose()
       }, 10)
       return mockSubCloser

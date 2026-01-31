@@ -6,7 +6,6 @@ import {
   createMemberEvent,
   createSettlementEvent,
   parseExpenseEvent,
-  parseLockEvent,
   parseMemberEvent,
   parseSettlementEvent,
   validateExpenseEvent,

@@ -80,7 +80,7 @@ export function LightningPaymentModal({
     const amountNum = Number(amount)
 
     // Comprehensive validation
-    if (isNaN(amountNum)) {
+    if (Number.isNaN(amountNum)) {
       setError('有効な数値を入力してください')
       return
     }

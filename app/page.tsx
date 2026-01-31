@@ -13,7 +13,7 @@ import { generateSettlementId } from '@/lib/nostr/settlement/id'
 import type { Currency } from '@/types/split-calculator'
 
 export default function Page() {
-  const searchParams = useSearchParams()
+  const _searchParams = useSearchParams()
   const router = useRouter()
 
   const [mode, setMode] = useState<SyncMode>('standalone')

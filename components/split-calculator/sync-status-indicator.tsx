@@ -43,9 +43,8 @@ export function SyncStatusIndicator({ status, className }: SyncStatusIndicatorPr
   const Icon = config.icon
 
   return (
-    <div
+    <output
       className={cn('flex items-center gap-1 text-xs', config.color, className)}
-      role="status"
       aria-live="polite"
     >
       <Icon
@@ -53,6 +52,6 @@ export function SyncStatusIndicator({ status, className }: SyncStatusIndicatorPr
         aria-hidden="true"
       />
       <span>{config.label}</span>
-    </div>
+    </output>
   )
 }

@@ -3,10 +3,9 @@
  * TDD Red Phase: Settlement同期フックのテストケース
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { generateInviteLink, parseInviteLink, useInviteLink, useSettlementSync } from '../hooks'
-import type { SettlementState } from '../state'
 
 // モック
 vi.mock('../relay', () => ({
@@ -25,7 +24,7 @@ vi.mock('nostr-tools', async () => {
     ...actual,
     generateSecretKey: () => new Uint8Array(32).fill(1),
     getPublicKey: () => 'mock-pubkey',
-    finalizeEvent: (template: any, sk: Uint8Array) => ({
+    finalizeEvent: (template: Record<string, unknown>, _sk: Uint8Array) => ({
       ...template,
       id: 'mock-event-id',
       pubkey: 'mock-pubkey',
