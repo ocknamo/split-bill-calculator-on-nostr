@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useCallback, useRef } from "react"
 import { generateSecretKey, getPublicKey, finalizeEvent, type Event } from "nostr-tools"
-import { createRelayClient, fetchSettlementEvents, DEFAULT_RELAYS, type RelayClient, type RelayConfig } from "./relay"
+import { createRelayClient, fetchSettlementEvents, type RelayClient, type RelayConfig } from "./relay"
 import { buildSettlementState, type SettlementState } from "./state"
 
 import {
@@ -14,6 +14,7 @@ import {
   createLockEvent,
   createSettlementEvent,
 } from "./events"
+import { DEFAULT_RELAYS } from "@/lib/constants"
 
 /**
  * 招待リンクをパース

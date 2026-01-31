@@ -1,9 +1,10 @@
 // Nostr Relays
 export const DEFAULT_RELAYS = [
   "wss://relay.damus.io",
-  "wss://relay.nostr.band",
   "wss://nos.lol",
   "wss://relay.snort.social",
+  "wss://yabu.me",
+  "wss://r.kojira.io",
 ] as const
 
 // API URLs

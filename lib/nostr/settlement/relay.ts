@@ -169,13 +169,3 @@ export async function fetchSettlementEvents(
     pool.close(relays)
   }
 }
-
-/**
- * デフォルトのRelay一覧
- */
-export const DEFAULT_RELAYS = [
-  "wss://relay.damus.io",
-  "wss://relay.nostr.band",
-  "wss://nos.lol",
-  "wss://relay.snort.social",
-]

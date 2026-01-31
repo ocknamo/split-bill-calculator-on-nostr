@@ -65,7 +65,6 @@ export {
 export {
   createRelayClient,
   fetchSettlementEvents,
-  DEFAULT_RELAYS,
   type RelayConfig,
   type RelayClient,
   type SubscriptionOptions,
