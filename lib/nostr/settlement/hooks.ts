@@ -4,7 +4,7 @@ import { type Event, finalizeEvent, generateSecretKey, getPublicKey } from 'nost
 /**
  * Settlement同期用React Hooks
  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DEFAULT_RELAYS } from '@/lib/constants'
 import {
   createExpenseEvent,
@@ -19,6 +19,7 @@ import {
   type RelayConfig,
 } from './relay'
 import { buildSettlementState, type SettlementState } from './state'
+import { loadOwnerKey, saveOwnerKey } from './storage'
 
 /**
  * 招待リンクをパース
@@ -116,6 +117,9 @@ export async function createSettlement(
   const sk = generateSecretKey()
   const ownerPubkey = getPublicKey(sk)
 
+  // Owner秘密鍵を保存
+  saveOwnerKey(settlementId, sk, ownerPubkey)
+
   console.log('[v0] createSettlement: creating event template')
 
   // Settlement Eventを作成
@@ -132,7 +136,7 @@ export async function createSettlement(
   console.log('[v0] createSettlement: event created', { id: event.id, kind: event.kind })
 
   // Relayに発行
-  const config: RelayConfig = { relays, timeout: 10000 }
+  const config: RelayConfig = { relays: [...relays], timeout: 10000 }
   const client = createRelayClient(config)
 
   try {
@@ -188,9 +192,20 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
   const [events, setEvents] = useState<Event[]>([])
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting')
 
+  // Owner keypair（LocalStorageから読み込み）
+  const ownerKeyRef = useRef<{ sk: Uint8Array; pubkey: string } | null>(null)
   // Actor keypair（一時鍵）
   const actorRef = useRef<{ sk: Uint8Array; pubkey: string } | null>(null)
   const clientRef = useRef<RelayClient | null>(null)
+
+  // Owner秘密鍵をロード
+  useEffect(() => {
+    const ownerKey = loadOwnerKey(settlementId)
+    if (ownerKey) {
+      ownerKeyRef.current = ownerKey
+      console.log('[v0] Owner key loaded:', { settlementId, pubkey: ownerKey.pubkey })
+    }
+  }, [settlementId])
 
   // Actor keypairを初期化
   useEffect(() => {
@@ -284,14 +299,14 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
     [settlementId, inviteToken, handleEvent]
   )
 
-  // Member追加
+  // Member追加（Owner権限が必要）
   const addMember = useCallback(
     async (memberPubkey: string, name: string) => {
-      if (!actorRef.current || !clientRef.current) {
-        throw new Error('Not initialized')
+      if (!ownerKeyRef.current || !clientRef.current) {
+        throw new Error('Owner権限がありません')
       }
 
-      const { sk, pubkey } = actorRef.current
+      const { sk, pubkey } = ownerKeyRef.current
 
       const template = createMemberEvent({
         settlementId,
@@ -306,14 +321,14 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
     [settlementId, handleEvent]
   )
 
-  // Settlementをロック
+  // Settlementをロック（Owner権限が必要）
   const lockSettlement = useCallback(
     async (acceptedEventIds: string[]) => {
-      if (!actorRef.current || !clientRef.current) {
-        throw new Error('Not initialized')
+      if (!ownerKeyRef.current || !clientRef.current) {
+        throw new Error('Owner権限がありません')
       }
 
-      const { sk, pubkey } = actorRef.current
+      const { sk, pubkey } = ownerKeyRef.current
 
       const template = createLockEvent({
         settlementId,
@@ -346,7 +361,9 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
   }, [settlementId, relays])
 
   // Check if current user is owner
-  const isOwner = actorRef.current ? state?.ownerPubkey === actorRef.current.pubkey : false
+  const isOwner = useMemo(() => {
+    return ownerKeyRef.current !== null && state?.ownerPubkey === ownerKeyRef.current.pubkey
+  }, [state?.ownerPubkey])
 
   return {
     state,

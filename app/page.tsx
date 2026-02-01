@@ -10,6 +10,7 @@ import { SplitCalculatorSync } from '@/components/split-calculator-sync'
 import { generateInviteToken } from '@/lib/nostr/settlement/capability'
 import { createSettlement, generateInviteLink, parseInviteLink } from '@/lib/nostr/settlement/hooks'
 import { generateSettlementId } from '@/lib/nostr/settlement/id'
+import { cleanupOldOwnerKeys } from '@/lib/nostr/settlement/storage'
 import type { Currency } from '@/types/split-calculator'
 
 export default function Page() {
@@ -23,8 +24,11 @@ export default function Page() {
     inviteToken: string
   } | null>(null)
 
-  // Check URL for invite link on mount
+  // Check URL for invite link on mount and cleanup old keys
   useEffect(() => {
+    // Cleanup old owner keys (30+ days)
+    cleanupOldOwnerKeys()
+
     const parsed = parseInviteLink(window.location.href)
     if (parsed) {
       setSyncSession({
