@@ -30,37 +30,77 @@ export async function fetchNostrProfile(npub: string): Promise<NostrProfile | nu
   if (!pubkey) return null
 
   const pool = new SimplePool()
+  const relays = [...DEFAULT_RELAYS]
 
-  try {
-    // Create a timeout promise
-    const timeoutPromise = new Promise<null>((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout')), FETCH_TIMEOUT_MS)
-    })
+  return new Promise((resolve) => {
+    let resolved = false
+    let timeoutId: NodeJS.Timeout | null = null
+    let sub: ReturnType<typeof pool.subscribeMany> | null = null
 
-    // Race between fetch and timeout
-    const event = await Promise.race([
-      pool.get([...DEFAULT_RELAYS], {
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
+      if (sub) {
+        sub.close()
+        sub = null
+      }
+      // Close pool after a short delay to allow pending operations to complete
+      setTimeout(() => {
+        try {
+          pool.close(relays)
+        } catch (_err) {
+          // Ignore errors during close (e.g., WebSocket already closed)
+        }
+      }, 100)
+    }
+
+    const finish = (result: NostrProfile | null) => {
+      if (resolved) return
+      resolved = true
+      cleanup()
+      resolve(result)
+    }
+
+    // Set timeout
+    timeoutId = setTimeout(() => {
+      console.warn('Timeout fetching Nostr profile for', npub)
+      finish(null)
+    }, FETCH_TIMEOUT_MS)
+
+    // Subscribe to profile events
+    sub = pool.subscribeMany(
+      relays,
+      {
         kinds: [0],
         authors: [pubkey],
-      }),
-      timeoutPromise,
-    ])
-
-    if (event) {
-      const content = JSON.parse(event.content) as NostrProfile
-      return {
-        name: content.name,
-        displayName: content.displayName,
-        picture: content.picture,
-        lud16: content.lud16,
-        nip05: content.nip05,
+        limit: 1,
+      },
+      {
+        onevent(event) {
+          try {
+            const content = JSON.parse(event.content) as NostrProfile
+            finish({
+              name: content.name,
+              displayName: content.displayName,
+              picture: content.picture,
+              lud16: content.lud16,
+              nip05: content.nip05,
+            })
+          } catch (err) {
+            console.error('Failed to parse profile content:', err)
+            finish(null)
+          }
+        },
+        oneose() {
+          // If we haven't received any events by EOSE, resolve with null
+          if (!resolved) {
+            console.warn('No profile found for', npub)
+            finish(null)
+          }
+        },
       }
-    }
-    return null
-  } catch (error) {
-    console.error('Failed to fetch Nostr profile:', error)
-    return null
-  } finally {
-    pool.close([...DEFAULT_RELAYS])
-  }
+    )
+  })
 }
