@@ -51,6 +51,8 @@ export interface SettlementContent {
 export interface MemberInfo {
   pubkey: string
   name: string
+  picture?: string
+  lud16?: string
 }
 
 // Member definition content (kind: 30051)

@@ -17,7 +17,7 @@ import {
   fetchSettlementEvents,
   type RelayClient,
   type RelayConfig,
-} from './relay'
+} from './relay-rx'
 import { buildSettlementState, type SettlementState } from './state'
 import { loadOwnerKey, saveOwnerKey } from './storage'
 
@@ -178,7 +178,7 @@ export interface UseSettlementSyncResult {
     currency: string,
     note: string
   ) => Promise<void>
-  addMember: (pubkey: string, name: string) => Promise<void>
+  addMember: (pubkey: string, name: string, picture?: string, lud16?: string) => Promise<void>
   lockSettlement: (acceptedEventIds: string[]) => Promise<void>
   refresh: () => Promise<void>
 }
@@ -242,7 +242,7 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
 
   // 初期読み込み（リアルタイム購読は一旦無効化、querySync のみ使用）
   useEffect(() => {
-    const config: RelayConfig = { relays, timeout: 10000 }
+    const config: RelayConfig = { relays: [...relays], timeout: 10000 }
 
     async function init() {
       try {
@@ -301,24 +301,43 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
 
   // Member追加（Owner権限が必要）
   const addMember = useCallback(
-    async (memberPubkey: string, name: string) => {
+    async (memberPubkey: string, name: string, picture?: string, lud16?: string) => {
       if (!ownerKeyRef.current || !clientRef.current) {
         throw new Error('Owner権限がありません')
       }
 
       const { sk, pubkey } = ownerKeyRef.current
 
+      // 既存メンバーを取得
+      const existingMembers = state?.members || []
+
+      // 重複チェック
+      if (existingMembers.some((m) => m.pubkey === memberPubkey)) {
+        throw new Error('このメンバーは既に追加されています')
+      }
+
+      // 全メンバーを含む新しいリストを作成
+      const allMembers = [
+        ...existingMembers,
+        {
+          pubkey: memberPubkey,
+          name,
+          picture,
+          lud16,
+        },
+      ]
+
       const template = createMemberEvent({
         settlementId,
         ownerPubkey: pubkey,
-        members: [{ pubkey: memberPubkey, name }],
+        members: allMembers,
       })
       const event = finalizeEvent(template, sk)
 
       await clientRef.current.publish(event)
       handleEvent(event)
     },
-    [settlementId, handleEvent]
+    [settlementId, state?.members, handleEvent]
   )
 
   // Settlementをロック（Owner権限が必要）
@@ -345,7 +364,7 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
 
   // 再取得
   const refresh = useCallback(async () => {
-    const config: RelayConfig = { relays, timeout: 10000 }
+    const config: RelayConfig = { relays: [...relays], timeout: 10000 }
     setIsLoading(true)
     setConnectionStatus('connecting')
     try {

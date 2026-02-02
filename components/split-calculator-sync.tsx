@@ -38,6 +38,14 @@ function stateToMembers(state: SettlementState | null): Member[] {
     id: m.pubkey,
     name: m.name,
     npub: m.pubkey,
+    nostrProfile:
+      m.picture || m.lud16
+        ? {
+            name: m.name,
+            picture: m.picture,
+            lud16: m.lud16,
+          }
+        : undefined,
   }))
 }
 
@@ -191,7 +199,13 @@ export function SplitCalculatorSync({
   // Handlers
   const handleAddMember = useCallback(
     async (member: Member) => {
-      await addMember(member.id, member.name)
+      // プロフィール情報も一緒に保存
+      await addMember(
+        member.id,
+        member.name,
+        member.nostrProfile?.picture,
+        member.nostrProfile?.lud16
+      )
     },
     [addMember]
   )
@@ -254,8 +268,8 @@ export function SplitCalculatorSync({
   // Prepare expenses for lock dialog
   const expensesForLock = useMemo(() => {
     return expenses.map((e) => {
+      const invalidExpense = state?.invalidExpenses?.find((inv) => inv.event.id === e.id)
       const member = members.find((m) => m.id === e.paidById)
-      const invalidExpense = state?.invalidExpenses?.find((inv) => inv.eventId === e.id)
       return {
         id: e.id,
         description: e.description,
