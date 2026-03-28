@@ -1,7 +1,16 @@
+export interface NostrProfileInfo {
+  name?: string;
+  displayName?: string;
+  picture?: string;
+  lud16?: string;
+  nip05?: string;
+}
+
 export interface Member {
   id: string;
   name: string;
   npub?: string;
+  nostrProfile?: NostrProfileInfo;
 }
 
 export interface Expense {

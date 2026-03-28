@@ -1,2 +1,97 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+  import { generateInviteToken } from '$lib/nostr/settlement/capability'
+  import { createSettlement, generateInviteLink, parseInviteLink } from '$lib/nostr/settlement/settlement-sync.svelte'
+  import { generateSettlementId } from '$lib/nostr/settlement/id'
+  import { cleanupOldOwnerKeys } from '$lib/nostr/settlement/storage'
+  import type { Currency } from '$lib/types/split-calculator'
+  import CreateSettlementDialog from '$lib/components/CreateSettlementDialog.svelte'
+  import SplitCalculator from '$lib/components/SplitCalculator.svelte'
+  import SplitCalculatorSync from '$lib/components/SplitCalculatorSync.svelte'
+  import SyncModeSelector, { type SyncMode } from '$lib/components/SyncModeSelector.svelte'
+
+  type SyncSession = { settlementId: string; inviteToken: string }
+
+  let mode = $state<SyncMode>('standalone')
+  let syncSession = $state<SyncSession | null>(null)
+  let showCreateDialog = $state(false)
+  let toast = $state<string | null>(null)
+
+  function showToast(msg: string) {
+    toast = msg
+    setTimeout(() => (toast = null), 3000)
+  }
+
+  $effect(() => {
+    cleanupOldOwnerKeys()
+    const parsed = parseInviteLink(window.location.href)
+    if (parsed) {
+      syncSession = parsed
+      mode = 'sync'
+    }
+  })
+
+  function handleModeChange(newMode: SyncMode) {
+    mode = newMode
+    if (newMode === 'standalone') {
+      syncSession = null
+      history.replaceState(null, '', '/')
+    }
+  }
+
+  async function handleCreate(name: string, currency: Currency) {
+    const settlementId = generateSettlementId()
+    const inviteToken = generateInviteToken()
+
+    await createSettlement({ settlementId, inviteToken, name, currency: currency.toUpperCase() })
+
+    syncSession = { settlementId, inviteToken }
+    mode = 'sync'
+
+    const link = generateInviteLink(settlementId, inviteToken, window.location.origin)
+    history.replaceState(null, '', link)
+
+    showToast('精算を作成しました')
+  }
+
+  function handleBack() {
+    syncSession = null
+    mode = 'standalone'
+    history.replaceState(null, '', '/')
+  }
+</script>
+
+<div class="min-h-screen bg-gray-50 p-4 md:p-8">
+  <div class="mx-auto max-w-2xl">
+    {#if mode === 'sync' && syncSession}
+      <SplitCalculatorSync
+        settlementId={syncSession.settlementId}
+        inviteToken={syncSession.inviteToken}
+        onBack={handleBack}
+      />
+    {:else}
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-900 md:text-4xl">ワリカンさん</h1>
+        <p class="mt-2 text-gray-500">グループでの支払いを簡単に精算</p>
+      </div>
+
+      <SyncModeSelector {mode} onModeChange={handleModeChange} onCreateSettlement={() => (showCreateDialog = true)} />
+
+      {#if mode === 'standalone'}
+        <SplitCalculator />
+      {/if}
+    {/if}
+  </div>
+</div>
+
+<CreateSettlementDialog
+  isOpen={showCreateDialog}
+  onClose={() => (showCreateDialog = false)}
+  onCreate={handleCreate}
+/>
+
+<!-- Toast notification -->
+{#if toast}
+  <div class="fixed bottom-4 right-4 rounded-lg bg-gray-900 px-4 py-3 text-sm text-white shadow-lg">
+    {toast}
+  </div>
+{/if}
