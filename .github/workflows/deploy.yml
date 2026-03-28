@@ -31,17 +31,14 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: packages/app/pnpm-lock.yaml
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
-        working-directory: packages/app
         run: pnpm install --frozen-lockfile
 
       - name: Build site
-        working-directory: packages/app
         env:
           NODE_ENV: production
         run: pnpm run build
@@ -49,7 +46,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: packages/app/build
+          path: build
 
   deploy:
     environment:
