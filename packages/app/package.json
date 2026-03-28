@@ -24,5 +24,12 @@
 		"tailwindcss": "^4.1.18",
 		"typescript": "^5.9.3",
 		"vite-plus": "^0.1.14"
+	},
+	"dependencies": {
+		"@noble/hashes": "^2.0.1",
+		"@rx-nostr/crypto": "^0.0.0",
+		"clsx": "^2.1.1",
+		"rx-nostr": "^3.6.2",
+		"tailwind-merge": "^3.5.0"
 	}
 }
