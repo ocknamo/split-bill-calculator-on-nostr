@@ -1,178 +1,178 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { generateInviteLink, parseInviteLink, SettlementSync } from './settlement-sync.svelte'
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { generateInviteLink, parseInviteLink, SettlementSync } from "./settlement-sync.svelte";
 
 // Mock relay-rx
 const mockRelayClient = {
-	subscribe: vi.fn(() => ({ close: vi.fn() })),
-	publish: vi.fn().mockResolvedValue(undefined),
-	close: vi.fn()
-}
+  subscribe: vi.fn(() => ({ close: vi.fn() })),
+  publish: vi.fn().mockResolvedValue(undefined),
+  close: vi.fn(),
+};
 
-vi.mock('$lib/nostr/settlement/relay-rx', () => ({
-	createRelayClient: vi.fn(() => mockRelayClient),
-	fetchSettlementEvents: vi.fn(() => Promise.resolve([]))
-}))
+vi.mock("$lib/nostr/settlement/relay-rx", () => ({
+  createRelayClient: vi.fn(() => mockRelayClient),
+  fetchSettlementEvents: vi.fn(() => Promise.resolve([])),
+}));
 
 // Mock @rx-nostr/crypto
-vi.mock('@rx-nostr/crypto', () => ({
-	generateSecretKey: vi.fn(() => new Uint8Array(32).fill(1)),
-	getPublicKey: vi.fn(() => 'mock-pubkey'),
-	finalizeEvent: vi.fn((template: Record<string, unknown>) => ({
-		...template,
-		id: 'mock-event-id',
-		pubkey: 'mock-pubkey',
-		sig: 'mock-sig'
-	}))
-}))
+vi.mock("@rx-nostr/crypto", () => ({
+  generateSecretKey: vi.fn(() => new Uint8Array(32).fill(1)),
+  getPublicKey: vi.fn(() => "mock-pubkey"),
+  finalizeEvent: vi.fn((template: Record<string, unknown>) => ({
+    ...template,
+    id: "mock-event-id",
+    pubkey: "mock-pubkey",
+    sig: "mock-sig",
+  })),
+}));
 
 // Mock storage
-vi.mock('$lib/nostr/settlement/storage', () => ({
-	loadOwnerKey: vi.fn(() => null),
-	saveOwnerKey: vi.fn()
-}))
+vi.mock("$lib/nostr/settlement/storage", () => ({
+  loadOwnerKey: vi.fn(() => null),
+  saveOwnerKey: vi.fn(),
+}));
 
-describe('parseInviteLink', () => {
-	it('should parse valid invite link', () => {
-		const result = parseInviteLink('https://example.com/join?s=settlement-123&t=token-abc')
-		expect(result).toEqual({ settlementId: 'settlement-123', inviteToken: 'token-abc' })
-	})
+describe("parseInviteLink", () => {
+  it("should parse valid invite link", () => {
+    const result = parseInviteLink("https://example.com/join?s=settlement-123&t=token-abc");
+    expect(result).toEqual({ settlementId: "settlement-123", inviteToken: "token-abc" });
+  });
 
-	it('should return null for invalid URL', () => {
-		expect(parseInviteLink('not-a-url')).toBeNull()
-	})
+  it("should return null for invalid URL", () => {
+    expect(parseInviteLink("not-a-url")).toBeNull();
+  });
 
-	it('should return null if settlement_id is missing', () => {
-		expect(parseInviteLink('https://example.com/join?t=token-abc')).toBeNull()
-	})
+  it("should return null if settlement_id is missing", () => {
+    expect(parseInviteLink("https://example.com/join?t=token-abc")).toBeNull();
+  });
 
-	it('should return null if invite_token is missing', () => {
-		expect(parseInviteLink('https://example.com/join?s=settlement-123')).toBeNull()
-	})
+  it("should return null if invite_token is missing", () => {
+    expect(parseInviteLink("https://example.com/join?s=settlement-123")).toBeNull();
+  });
 
-	it('should handle URL with additional parameters', () => {
-		const result = parseInviteLink(
-			'https://example.com/join?s=settlement-123&t=token-abc&extra=value'
-		)
-		expect(result).toEqual({ settlementId: 'settlement-123', inviteToken: 'token-abc' })
-	})
-})
+  it("should handle URL with additional parameters", () => {
+    const result = parseInviteLink(
+      "https://example.com/join?s=settlement-123&t=token-abc&extra=value",
+    );
+    expect(result).toEqual({ settlementId: "settlement-123", inviteToken: "token-abc" });
+  });
+});
 
-describe('generateInviteLink', () => {
-	it('should generate invite link with s and t params', () => {
-		const result = generateInviteLink('settlement-123', 'token-abc', 'https://example.com/join')
-		expect(result).toBe('https://example.com/join?s=settlement-123&t=token-abc')
-	})
+describe("generateInviteLink", () => {
+  it("should generate invite link with s and t params", () => {
+    const result = generateInviteLink("settlement-123", "token-abc", "https://example.com/join");
+    expect(result).toBe("https://example.com/join?s=settlement-123&t=token-abc");
+  });
 
-	it('should URL encode special characters', () => {
-		const result = generateInviteLink('settlement/123', 'token+abc', 'https://example.com/join')
-		expect(result).toContain('settlement%2F123')
-		expect(result).toContain('token%2Babc')
-	})
-})
+  it("should URL encode special characters", () => {
+    const result = generateInviteLink("settlement/123", "token+abc", "https://example.com/join");
+    expect(result).toContain("settlement%2F123");
+    expect(result).toContain("token%2Babc");
+  });
+});
 
-describe('SettlementSync', () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-	})
+describe("SettlementSync", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-	afterEach(() => {
-		vi.clearAllMocks()
-	})
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
-	it('should initialize with loading state', () => {
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
+  it("should initialize with loading state", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
 
-		expect(sync.isLoading).toBe(true)
-		expect(sync.state).toBeNull()
-		expect(sync.error).toBeNull()
-		expect(sync.connectionStatus).toBe('connecting')
-	})
+    expect(sync.isLoading).toBe(true);
+    expect(sync.state).toBeNull();
+    expect(sync.error).toBeNull();
+    expect(sync.connectionStatus).toBe("connecting");
+  });
 
-	it('should expose addExpense method', () => {
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
-		expect(typeof sync.addExpense).toBe('function')
-	})
+  it("should expose addExpense method", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(typeof sync.addExpense).toBe("function");
+  });
 
-	it('should expose addMember method', () => {
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
-		expect(typeof sync.addMember).toBe('function')
-	})
+  it("should expose addMember method", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(typeof sync.addMember).toBe("function");
+  });
 
-	it('should expose lockSettlement method', () => {
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
-		expect(typeof sync.lockSettlement).toBe('function')
-	})
+  it("should expose lockSettlement method", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(typeof sync.lockSettlement).toBe("function");
+  });
 
-	it('should expose refresh method', () => {
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
-		expect(typeof sync.refresh).toBe('function')
-	})
+  it("should expose refresh method", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(typeof sync.refresh).toBe("function");
+  });
 
-	it('should not throw when destroy is called', () => {
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
-		expect(() => sync.destroy()).not.toThrow()
-	})
+  it("should not throw when destroy is called", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(() => sync.destroy()).not.toThrow();
+  });
 
-	it('should report isOwner false when no owner key stored', () => {
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
-		expect(sync.isOwner).toBe(false)
-	})
+  it("should report isOwner false when no owner key stored", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(sync.isOwner).toBe(false);
+  });
 
-	it('should load owner key from storage on construction', async () => {
-		const { loadOwnerKey } = await import('$lib/nostr/settlement/storage')
-		new SettlementSync({ settlementId: 'sid', inviteToken: 'tok' })
-		expect(loadOwnerKey).toHaveBeenCalledWith('sid')
-	})
+  it("should load owner key from storage on construction", async () => {
+    const { loadOwnerKey } = await import("$lib/nostr/settlement/storage");
+    new SettlementSync({ settlementId: "sid", inviteToken: "tok" });
+    expect(loadOwnerKey).toHaveBeenCalledWith("sid");
+  });
 
-	it('should transition to connected after successful init', async () => {
-		const { fetchSettlementEvents } = await import('$lib/nostr/settlement/relay-rx')
-		vi.mocked(fetchSettlementEvents).mockResolvedValueOnce([])
+  it("should transition to connected after successful init", async () => {
+    const { fetchSettlementEvents } = await import("$lib/nostr/settlement/relay-rx");
+    vi.mocked(fetchSettlementEvents).mockResolvedValueOnce([]);
 
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
 
-		await sync.init()
+    await sync.init();
 
-		expect(sync.isLoading).toBe(false)
-		expect(sync.connectionStatus).toBe('connected')
-	})
+    expect(sync.isLoading).toBe(false);
+    expect(sync.connectionStatus).toBe("connected");
+  });
 
-	it('should set error and disconnected status on init failure', async () => {
-		const { fetchSettlementEvents } = await import('$lib/nostr/settlement/relay-rx')
-		vi.mocked(fetchSettlementEvents).mockRejectedValueOnce(new Error('Network error'))
+  it("should set error and disconnected status on init failure", async () => {
+    const { fetchSettlementEvents } = await import("$lib/nostr/settlement/relay-rx");
+    vi.mocked(fetchSettlementEvents).mockRejectedValueOnce(new Error("Network error"));
 
-		const sync = new SettlementSync({
-			settlementId: 'settlement-123',
-			inviteToken: 'token-abc'
-		})
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
 
-		await sync.init()
+    await sync.init();
 
-		expect(sync.isLoading).toBe(false)
-		expect(sync.connectionStatus).toBe('error')
-		expect(sync.error).toContain('Network error')
-	})
-})
+    expect(sync.isLoading).toBe(false);
+    expect(sync.connectionStatus).toBe("error");
+    expect(sync.error).toContain("Network error");
+  });
+});
