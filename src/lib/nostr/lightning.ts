@@ -25,7 +25,7 @@ export async function fetchLnurlPayInfo(lud16: string): Promise<LnurlPayInfo | n
 
 export async function fetchLightningInvoice(
   callback: string,
-  amountMsat: number
+  amountMsat: number,
 ): Promise<string | null> {
   try {
     const url = `${callback}?amount=${amountMsat}`

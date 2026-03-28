@@ -53,7 +53,7 @@ export interface SettlementState {
 export async function buildSettlementState(
   events: NostrEvent[],
   inviteToken: string,
-  settlementId: string
+  settlementId: string,
 ): Promise<SettlementState | null> {
   const parsedEvents = categorizeEvents(events, settlementId)
 
@@ -128,15 +128,18 @@ function categorizeEvents(events: NostrEvent[], settlementId: string): Categoriz
   for (const event of events) {
     const settlement = parseSettlementEvent(event)
     if (settlement && settlement.settlementId === settlementId) {
-      result.settlements.push(settlement); continue
+      result.settlements.push(settlement)
+      continue
     }
     const member = parseMemberEvent(event)
     if (member && member.settlementId === settlementId) {
-      result.members.push(member); continue
+      result.members.push(member)
+      continue
     }
     const expense = parseExpenseEvent(event)
     if (expense && expense.settlementId === settlementId) {
-      result.expenses.push(expense); continue
+      result.expenses.push(expense)
+      continue
     }
     const lock = parseLockEvent(event)
     if (lock && lock.settlementId === settlementId) {
@@ -153,11 +156,14 @@ function findValidSettlement(settlements: SettlementEvent[]): SettlementEvent | 
   return null
 }
 
-function findLatestValidMemberEvent(members: MemberEvent[], ownerPubkey: string): MemberEvent | null {
+function findLatestValidMemberEvent(
+  members: MemberEvent[],
+  ownerPubkey: string,
+): MemberEvent | null {
   const valid = members.filter((m) => validateMemberEvent(m, ownerPubkey))
   if (valid.length === 0) return null
   return valid.reduce((latest, current) =>
-    current.created_at > latest.created_at ? current : latest
+    current.created_at > latest.created_at ? current : latest,
   )
 }
 
@@ -165,14 +171,14 @@ function findValidLockEvent(locks: LockEvent[], ownerPubkey: string): LockEvent 
   const valid = locks.filter((l) => l.pubkey === ownerPubkey)
   if (valid.length === 0) return null
   return valid.reduce((latest, current) =>
-    current.created_at > latest.created_at ? current : latest
+    current.created_at > latest.created_at ? current : latest,
   )
 }
 
 async function categorizeExpenses(
   expenses: ExpenseEvent[],
   inviteToken: string,
-  validMemberPubkeys: string[]
+  validMemberPubkeys: string[],
 ): Promise<{ valid: ExpenseEvent[]; invalid: InvalidExpense[] }> {
   const valid: ExpenseEvent[] = []
   const invalid: InvalidExpense[] = []

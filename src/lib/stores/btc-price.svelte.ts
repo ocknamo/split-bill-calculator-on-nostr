@@ -1,6 +1,7 @@
 import { browser } from '$app/environment'
 
-const BTC_PRICE_API = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy,usd'
+const BTC_PRICE_API =
+  'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy,usd'
 
 interface BtcPriceState {
   btcPrice: { jpy: number; usd: number } | null
@@ -35,9 +36,15 @@ function createBtcPriceStore(): BtcPriceState {
   }
 
   return {
-    get btcPrice() { return btcPrice },
-    get loading() { return loading },
-    get rateLimited() { return rateLimited },
+    get btcPrice() {
+      return btcPrice
+    },
+    get loading() {
+      return loading
+    },
+    get rateLimited() {
+      return rateLimited
+    },
     fetchBtcPrice,
   }
 }

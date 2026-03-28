@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 
 // browser=false (default mock) — loadFromStorage returns fallback, $effect is no-op
 describe('persistedState (browser=false)', () => {

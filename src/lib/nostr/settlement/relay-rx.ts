@@ -42,8 +42,12 @@ export function createRelayClient(config: RelayConfig): RelayClient {
         .use(rxReq, { relays })
         .pipe(uniq())
         .subscribe({
-          next: (packet) => { onEvent(packet.event as NostrEvent) },
-          complete: () => { onEose?.() },
+          next: (packet) => {
+            onEvent(packet.event as NostrEvent)
+          },
+          complete: () => {
+            onEose?.()
+          },
         })
 
       rxReq.emit({ kinds: filterKinds, '#d': [settlementId] })
@@ -88,7 +92,9 @@ export function createRelayClient(config: RelayConfig): RelayClient {
             if (successCount >= 1) done()
             else done(new Error('Publish failed: succeeded to 0 relays'))
           },
-          error: (err) => { done(err) },
+          error: (err) => {
+            done(err)
+          },
         })
       })
     },
@@ -101,7 +107,7 @@ export function createRelayClient(config: RelayConfig): RelayClient {
 
 export async function fetchSettlementEvents(
   config: RelayConfig,
-  settlementId: string
+  settlementId: string,
 ): Promise<NostrEvent[]> {
   const rxNostr = getRxNostr()
   const { relays } = config
@@ -125,7 +131,9 @@ export async function fetchSettlementEvents(
       .use(rxReq, { relays })
       .pipe(uniq())
       .subscribe({
-        next: (packet) => { events.push(packet.event as NostrEvent) },
+        next: (packet) => {
+          events.push(packet.event as NostrEvent)
+        },
         complete: () => {
           clearTimeout(timeoutId)
           resolve(events)

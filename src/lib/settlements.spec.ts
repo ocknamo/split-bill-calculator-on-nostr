@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { calculateSettlements } from './settlements'
 import type { Expense, Member } from './types/split-calculator'
 
@@ -63,10 +63,7 @@ describe('calculateSettlements', () => {
     const members = makeMembers(3)
     // m1: 2000, m2: 1000, m3: 0 → 合計 3000, 一人 1000
     // m1 balance: +1000 (creditor), m2 balance: 0, m3 balance: -1000 (debtor)
-    const expenses = [
-      makeExpense('e1', 'm1', 2000),
-      makeExpense('e2', 'm2', 1000),
-    ]
+    const expenses = [makeExpense('e1', 'm1', 2000), makeExpense('e2', 'm2', 1000)]
     const result = calculateSettlements(members, expenses)
 
     expect(result.totalAmount).toBe(3000)
@@ -103,10 +100,7 @@ describe('calculateSettlements', () => {
 
   it('既に均等割りの場合は精算不要', () => {
     const members = makeMembers(2)
-    const expenses = [
-      makeExpense('e1', 'm1', 500),
-      makeExpense('e2', 'm2', 500),
-    ]
+    const expenses = [makeExpense('e1', 'm1', 500), makeExpense('e2', 'm2', 500)]
     const result = calculateSettlements(members, expenses)
     expect(result.settlements).toHaveLength(0)
   })

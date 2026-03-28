@@ -115,7 +115,7 @@ export function createRelayClient(config: RelayConfig): RelayClient {
             resolve()
           } else {
             reject(
-              new Error(`Publish timeout after ${timeout}ms (succeeded to ${successCount} relays)`)
+              new Error(`Publish timeout after ${timeout}ms (succeeded to ${successCount} relays)`),
             )
           }
         }, timeout)
@@ -167,7 +167,7 @@ export function createRelayClient(config: RelayConfig): RelayClient {
  */
 export async function fetchSettlementEvents(
   config: RelayConfig,
-  settlementId: string
+  settlementId: string,
 ): Promise<NostrToolsEvent[]> {
   console.log('[v0] fetchSettlementEvents:', settlementId)
   const rxNostr = getRxNostr()

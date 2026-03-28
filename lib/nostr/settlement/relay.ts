@@ -94,7 +94,7 @@ export function createRelayClient(config: RelayConfig): RelayClient {
       try {
         // Create a timeout promise
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error(`Publish timeout after ${timeout}ms`)), timeout)
+          setTimeout(() => reject(new Error(`Publish timeout after ${timeout}ms`)), timeout),
         )
 
         // Race between publish and timeout
@@ -118,7 +118,7 @@ export function createRelayClient(config: RelayConfig): RelayClient {
  */
 export async function fetchSettlementEvents(
   config: RelayConfig,
-  settlementId: string
+  settlementId: string,
 ): Promise<Event[]> {
   console.log('[v0] fetchSettlementEvents:', settlementId)
   const pool = new SimplePool()

@@ -17,7 +17,7 @@ async function mockSign(
     | ReturnType<typeof createMemberEvent>
     | Awaited<ReturnType<typeof createExpenseEvent>>
     | ReturnType<typeof createLockEvent>,
-  id: string
+  id: string,
 ): Promise<NostrEvent> {
   return {
     ...(await Promise.resolve(unsigned)),
@@ -42,7 +42,7 @@ describe('buildSettlementState', () => {
         name: 'Test Trip',
         currency: 'JPY',
       }),
-      'settlement_event_id'
+      'settlement_event_id',
     )
 
     const memberEvent = await mockSign(
@@ -54,7 +54,7 @@ describe('buildSettlementState', () => {
           { pubkey: member2Pubkey, name: 'Member 2' },
         ],
       }),
-      'member_event_id'
+      'member_event_id',
     )
 
     const expense1 = await mockSign(
@@ -67,7 +67,7 @@ describe('buildSettlementState', () => {
         currency: 'JPY',
         note: 'Dinner',
       }),
-      'expense1_id'
+      'expense1_id',
     )
 
     const expense2 = await mockSign(
@@ -80,7 +80,7 @@ describe('buildSettlementState', () => {
         currency: 'JPY',
         note: 'Lunch',
       }),
-      'expense2_id'
+      'expense2_id',
     )
 
     return { settlementEvent, memberEvent, expense1, expense2 }
@@ -124,7 +124,7 @@ describe('buildSettlementState', () => {
         currency: 'JPY',
         note: 'Spam',
       }),
-      'invalid_expense_id'
+      'invalid_expense_id',
     )
 
     const events = [settlementEvent, memberEvent, expense1, invalidExpense]
@@ -149,7 +149,7 @@ describe('buildSettlementState', () => {
         currency: 'JPY',
         note: 'Unknown member expense',
       }),
-      'unknown_member_expense_id'
+      'unknown_member_expense_id',
     )
 
     const events = [settlementEvent, memberEvent, expense1, unknownMemberExpense]
@@ -169,7 +169,7 @@ describe('buildSettlementState', () => {
         ownerPubkey,
         acceptedEventIds: ['expense1_id'], // only accept expense1
       }),
-      'lock_event_id'
+      'lock_event_id',
     )
 
     const events = [settlementEvent, memberEvent, expense1, expense2, lockEvent]
@@ -191,7 +191,7 @@ describe('buildSettlementState', () => {
         ownerPubkey,
         acceptedEventIds: ['expense1_id', 'missing_event_id'],
       }),
-      'lock_event_id'
+      'lock_event_id',
     )
 
     const events = [settlementEvent, memberEvent, expense1, lockEvent]
@@ -212,7 +212,7 @@ describe('buildSettlementState', () => {
           ownerPubkey,
           members: [{ pubkey: member1Pubkey, name: 'Old Name' }],
         }),
-        'member_event_1'
+        'member_event_1',
       )),
       created_at: 1000,
     }
@@ -228,7 +228,7 @@ describe('buildSettlementState', () => {
             { pubkey: member2Pubkey, name: 'Member 2' },
           ],
         }),
-        'member_event_2'
+        'member_event_2',
       )),
       created_at: 2000,
     }
@@ -250,7 +250,7 @@ describe('buildSettlementState', () => {
         ownerPubkey: 'attacker_pubkey', // wrong signer
         members: [{ pubkey: 'attacker_pubkey', name: 'Attacker' }],
       }),
-      'attacker_member_event'
+      'attacker_member_event',
     )
 
     const validMemberEvent = await mockSign(
@@ -259,7 +259,7 @@ describe('buildSettlementState', () => {
         ownerPubkey,
         members: [{ pubkey: member1Pubkey, name: 'Member 1' }],
       }),
-      'valid_member_event'
+      'valid_member_event',
     )
 
     const events = [settlementEvent, attackerMemberEvent, validMemberEvent, expense1]

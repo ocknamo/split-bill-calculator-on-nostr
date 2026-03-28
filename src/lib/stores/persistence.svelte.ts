@@ -28,7 +28,9 @@ export function persistedState<T>(key: string, initial: T): { get value(): T; se
   let _value = $state<T>(loadFromStorage())
 
   return {
-    get value() { return _value },
+    get value() {
+      return _value
+    },
     set value(v: T) {
       _value = v
       saveToStorage(v)

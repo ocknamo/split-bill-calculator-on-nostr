@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('$app/environment', () => ({ browser: false }))
 
@@ -16,7 +16,6 @@ vi.mock('@rx-nostr/crypto', () => ({
   getEventHash: () => 'mock-event-id',
   getSignature: () => 'mock-sig',
 }))
-
 
 describe('parseInviteLink', () => {
   beforeEach(() => vi.resetModules())

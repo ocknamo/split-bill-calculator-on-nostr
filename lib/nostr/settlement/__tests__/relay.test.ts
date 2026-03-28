@@ -104,7 +104,7 @@ describe('RelayClient', () => {
           kinds: [EXPENSE_KIND],
           '#d': [settlementId],
         },
-        expect.any(Object)
+        expect.any(Object),
       )
     })
 

@@ -83,7 +83,7 @@ export interface SettlementState {
 export async function buildSettlementState(
   events: NostrEvent[],
   inviteToken: string,
-  settlementId: string
+  settlementId: string,
 ): Promise<SettlementState | null> {
   // Step 1: Parse and filter events by settlement ID
   const parsedEvents = categorizeEvents(events, settlementId)
@@ -223,7 +223,7 @@ function findValidSettlement(settlements: SettlementEvent[]): SettlementEvent | 
 
 function findLatestValidMemberEvent(
   members: MemberEvent[],
-  ownerPubkey: string
+  ownerPubkey: string,
 ): MemberEvent | null {
   // Filter valid member events (signed by owner)
   const validMembers = members.filter((m) => validateMemberEvent(m, ownerPubkey))
@@ -234,7 +234,7 @@ function findLatestValidMemberEvent(
 
   // Return the latest one (parameterized replaceable)
   return validMembers.reduce((latest, current) =>
-    current.created_at > latest.created_at ? current : latest
+    current.created_at > latest.created_at ? current : latest,
   )
 }
 
@@ -248,14 +248,14 @@ function findValidLockEvent(locks: LockEvent[], ownerPubkey: string): LockEvent 
 
   // Return the latest one (parameterized replaceable)
   return validLocks.reduce((latest, current) =>
-    current.created_at > latest.created_at ? current : latest
+    current.created_at > latest.created_at ? current : latest,
   )
 }
 
 async function categorizeExpenses(
   expenses: ExpenseEvent[],
   inviteToken: string,
-  validMemberPubkeys: string[]
+  validMemberPubkeys: string[],
 ): Promise<{ valid: ExpenseEvent[]; invalid: InvalidExpense[] }> {
   const valid: ExpenseEvent[] = []
   const invalid: InvalidExpense[] = []

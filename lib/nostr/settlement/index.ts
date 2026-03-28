@@ -9,12 +9,7 @@
  */
 
 // Capability (invite tokens)
-export {
-  calculateCap,
-  calculateInviteHash,
-  generateInviteToken,
-  verifyCap,
-} from './capability'
+export { calculateCap, calculateInviteHash, generateInviteToken, verifyCap } from './capability'
 // Event creation and parsing
 export {
   createExpenseEvent,

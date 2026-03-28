@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 vi.mock('$app/environment', () => ({ browser: false }))
 
@@ -39,7 +39,12 @@ describe('calculatorStore', () => {
     const { calculatorStore } = await import('./calculator.svelte')
     calculatorStore.addMember('アリス')
     const member = calculatorStore.members[0]
-    calculatorStore.addExpense({ description: 'ランチ', amount: 1000, paidById: member.id, currency: 'jpy' })
+    calculatorStore.addExpense({
+      description: 'ランチ',
+      amount: 1000,
+      paidById: member.id,
+      currency: 'jpy',
+    })
     calculatorStore.removeMember(member.id)
     expect(calculatorStore.expenses).toHaveLength(0)
   })
@@ -48,7 +53,12 @@ describe('calculatorStore', () => {
     const { calculatorStore } = await import('./calculator.svelte')
     calculatorStore.addMember('アリス')
     const member = calculatorStore.members[0]
-    calculatorStore.addExpense({ description: 'ランチ', amount: 1000, paidById: member.id, currency: 'jpy' })
+    calculatorStore.addExpense({
+      description: 'ランチ',
+      amount: 1000,
+      paidById: member.id,
+      currency: 'jpy',
+    })
     expect(calculatorStore.expenses).toHaveLength(1)
     expect(calculatorStore.expenses[0].amount).toBe(1000)
   })
@@ -58,10 +68,20 @@ describe('calculatorStore', () => {
     calculatorStore.addMember('アリス')
     const member = calculatorStore.members[0]
     expect(() =>
-      calculatorStore.addExpense({ description: 'テスト', amount: 0, paidById: member.id, currency: 'jpy' })
+      calculatorStore.addExpense({
+        description: 'テスト',
+        amount: 0,
+        paidById: member.id,
+        currency: 'jpy',
+      }),
     ).toThrow()
     expect(() =>
-      calculatorStore.addExpense({ description: 'テスト', amount: -100, paidById: member.id, currency: 'jpy' })
+      calculatorStore.addExpense({
+        description: 'テスト',
+        amount: -100,
+        paidById: member.id,
+        currency: 'jpy',
+      }),
     ).toThrow()
   })
 
@@ -69,7 +89,12 @@ describe('calculatorStore', () => {
     const { calculatorStore } = await import('./calculator.svelte')
     calculatorStore.addMember('アリス')
     const member = calculatorStore.members[0]
-    calculatorStore.addExpense({ description: 'ランチ', amount: 1000, paidById: member.id, currency: 'jpy' })
+    calculatorStore.addExpense({
+      description: 'ランチ',
+      amount: 1000,
+      paidById: member.id,
+      currency: 'jpy',
+    })
     const expId = calculatorStore.expenses[0].id
     calculatorStore.removeExpense(expId)
     expect(calculatorStore.expenses).toHaveLength(0)
@@ -80,7 +105,12 @@ describe('calculatorStore', () => {
     calculatorStore.addMember('アリス')
     calculatorStore.addMember('ボブ')
     const alice = calculatorStore.members[0]
-    calculatorStore.addExpense({ description: 'ランチ', amount: 1000, paidById: alice.id, currency: 'jpy' })
+    calculatorStore.addExpense({
+      description: 'ランチ',
+      amount: 1000,
+      paidById: alice.id,
+      currency: 'jpy',
+    })
     expect(calculatorStore.settlements.settlements).toHaveLength(1)
     expect(calculatorStore.settlements.settlements[0].amount).toBe(500)
     expect(calculatorStore.settlements.settlements[0].from).toBe(calculatorStore.members[1].id)

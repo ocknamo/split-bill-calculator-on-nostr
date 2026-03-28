@@ -6,10 +6,15 @@ import { getEventHash, getPublicKey, getSignature } from '@rx-nostr/crypto'
 
 function generateSecretKey(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32))
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
-function finalizeEvent(template: import('$lib/nostr/settlement/events/types').UnsignedEvent, sk: string): import('$lib/nostr/settlement/events/types').NostrEvent {
+function finalizeEvent(
+  template: import('$lib/nostr/settlement/events/types').UnsignedEvent,
+  sk: string,
+): import('$lib/nostr/settlement/events/types').NostrEvent {
   const pubkey = getPublicKey(sk)
   const eventWithPubkey = { ...template, pubkey }
   const id = getEventHash(eventWithPubkey)
@@ -74,7 +79,11 @@ export function parseInviteLink(url: string): { settlementId: string; inviteToke
 /**
  * 招待リンクを生成
  */
-export function generateInviteLink(settlementId: string, inviteToken: string, baseUrl: string): string {
+export function generateInviteLink(
+  settlementId: string,
+  inviteToken: string,
+  baseUrl: string,
+): string {
   const url = new URL(baseUrl)
   url.searchParams.set('s', settlementId)
   url.searchParams.set('t', inviteToken)
@@ -84,7 +93,9 @@ export function generateInviteLink(settlementId: string, inviteToken: string, ba
 /**
  * Settlement作成（Owner用）
  */
-export async function createSettlement(params: CreateSettlementParams): Promise<CreateSettlementResult> {
+export async function createSettlement(
+  params: CreateSettlementParams,
+): Promise<CreateSettlementResult> {
   const { settlementId, inviteToken, name, currency, relays = [...DEFAULT_RELAYS] } = params
 
   const sk = generateSecretKey()
@@ -93,7 +104,13 @@ export async function createSettlement(params: CreateSettlementParams): Promise<
   const skBytes = new Uint8Array(sk.match(/.{2}/g)!.map((b) => parseInt(b, 16)))
   saveOwnerKey(settlementId, skBytes, ownerPubkey)
 
-  const template = await createSettlementEvent({ settlementId, inviteToken, ownerPubkey, name, currency })
+  const template = await createSettlementEvent({
+    settlementId,
+    inviteToken,
+    ownerPubkey,
+    name,
+    currency,
+  })
   const event = finalizeEvent(template, sk)
 
   const config: RelayConfig = { relays: [...relays], timeout: 10000 }
@@ -149,7 +166,9 @@ export class SettlementSync {
     const ownerKey = loadOwnerKey(this.#settlementId)
     if (ownerKey) {
       this.#ownerKey = {
-        sk: Array.from(ownerKey.sk).map((b) => b.toString(16).padStart(2, '0')).join(''),
+        sk: Array.from(ownerKey.sk)
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join(''),
         pubkey: ownerKey.pubkey,
       }
     }
@@ -194,7 +213,12 @@ export class SettlementSync {
     }
   }
 
-  async addExpense(memberPubkey: string, amount: number, currency: string, note: string): Promise<void> {
+  async addExpense(
+    memberPubkey: string,
+    amount: number,
+    currency: string,
+    note: string,
+  ): Promise<void> {
     if (amount <= 0) throw new Error('金額は0より大きい値を入力してください')
     if (!this.#actorKey || !this.#client) throw new Error('Not initialized')
 
@@ -214,7 +238,12 @@ export class SettlementSync {
     await this.#buildState()
   }
 
-  async addMember(memberPubkey: string, name: string, picture?: string, lud16?: string): Promise<void> {
+  async addMember(
+    memberPubkey: string,
+    name: string,
+    picture?: string,
+    lud16?: string,
+  ): Promise<void> {
     if (!this.#ownerKey || !this.#client) throw new Error('Owner権限がありません')
 
     const { sk, pubkey } = this.#ownerKey
@@ -225,7 +254,11 @@ export class SettlementSync {
     }
 
     const allMembers = [...existingMembers, { pubkey: memberPubkey, name, picture, lud16 }]
-    const template = createMemberEvent({ settlementId: this.#settlementId, ownerPubkey: pubkey, members: allMembers })
+    const template = createMemberEvent({
+      settlementId: this.#settlementId,
+      ownerPubkey: pubkey,
+      members: allMembers,
+    })
     const event = finalizeEvent(template, sk)
     await this.#client.publish(event as NostrEvent)
     this.#addEvent(event as NostrEvent)
@@ -236,7 +269,11 @@ export class SettlementSync {
     if (!this.#ownerKey || !this.#client) throw new Error('Owner権限がありません')
 
     const { sk, pubkey } = this.#ownerKey
-    const template = createLockEvent({ settlementId: this.#settlementId, ownerPubkey: pubkey, acceptedEventIds })
+    const template = createLockEvent({
+      settlementId: this.#settlementId,
+      ownerPubkey: pubkey,
+      acceptedEventIds,
+    })
     const event = finalizeEvent(template, sk)
     await this.#client.publish(event as NostrEvent)
     this.#addEvent(event as NostrEvent)

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { isValidNpub, npubToHex } from './profile-rx'
 
 // A known valid npub and its hex equivalent for testing (32 zero bytes)

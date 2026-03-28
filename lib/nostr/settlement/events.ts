@@ -34,7 +34,7 @@ interface CreateSettlementEventParams {
 }
 
 export async function createSettlementEvent(
-  params: CreateSettlementEventParams
+  params: CreateSettlementEventParams,
 ): Promise<UnsignedEvent> {
   const { settlementId, inviteToken, ownerPubkey, name, currency } = params
 
@@ -270,7 +270,7 @@ export function validateMemberEvent(event: MemberEvent, ownerPubkey: string): bo
 export async function validateExpenseEvent(
   event: ExpenseEvent,
   inviteToken: string,
-  validMemberPubkeys: string[]
+  validMemberPubkeys: string[],
 ): Promise<{ isValid: boolean; capValid: boolean; memberValid: boolean }> {
   const capValid = await verifyCap(event.cap, inviteToken, event.pubkey)
   const memberValid = validMemberPubkeys.includes(event.parsedContent.member_pubkey)

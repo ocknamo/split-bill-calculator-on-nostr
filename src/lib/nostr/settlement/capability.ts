@@ -56,7 +56,7 @@ export async function calculateCap(inviteToken: string, pubkey: string): Promise
 export async function verifyCap(
   cap: string,
   inviteToken: string,
-  pubkey: string
+  pubkey: string,
 ): Promise<boolean> {
   const expectedCap = await calculateCap(inviteToken, pubkey)
   return cap === expectedCap

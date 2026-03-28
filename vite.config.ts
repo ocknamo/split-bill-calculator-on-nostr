@@ -1,9 +1,7 @@
-/// <reference types="vitest/config" />
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite-plus'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default defineConfig({
   plugins: [tailwindcss(), sveltekit()],
   test: {
@@ -17,4 +15,11 @@ export default defineConfig({
       '$app/stores': new URL('./src/mocks/app-stores.ts', import.meta.url).pathname,
     },
   },
-} as any)
+  lint: {
+    ignorePatterns: ['dist/**', '.svelte-kit/**'],
+  },
+  fmt: {
+    semi: false,
+    singleQuote: true,
+  },
+})

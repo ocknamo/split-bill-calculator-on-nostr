@@ -34,7 +34,7 @@ interface CreateSettlementEventParams {
 }
 
 export async function createSettlementEvent(
-  params: CreateSettlementEventParams
+  params: CreateSettlementEventParams,
 ): Promise<UnsignedEvent> {
   const { settlementId, inviteToken, ownerPubkey, name, currency } = params
   const content: SettlementContent = { name, currency }
@@ -132,7 +132,9 @@ export function parseSettlementEvent(event: NostrEvent): SettlementEvent | null 
     const inviteHash = getTagValue(event.tags, 'invite_hash')
     if (!settlementId || !ownerPubkey || !inviteHash) return null
     return { ...event, kind: SETTLEMENT_KIND, parsedContent, settlementId, ownerPubkey, inviteHash }
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 export function parseMemberEvent(event: NostrEvent): MemberEvent | null {
@@ -142,7 +144,9 @@ export function parseMemberEvent(event: NostrEvent): MemberEvent | null {
     const settlementId = getTagValue(event.tags, 'd')
     if (!settlementId) return null
     return { ...event, kind: MEMBER_KIND, parsedContent, settlementId }
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 export function parseExpenseEvent(event: NostrEvent): ExpenseEvent | null {
@@ -153,7 +157,9 @@ export function parseExpenseEvent(event: NostrEvent): ExpenseEvent | null {
     const cap = getTagValue(event.tags, 'cap')
     if (!settlementId || !cap) return null
     return { ...event, kind: EXPENSE_KIND, parsedContent, settlementId, cap }
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 export function parseLockEvent(event: NostrEvent): LockEvent | null {
@@ -163,7 +169,9 @@ export function parseLockEvent(event: NostrEvent): LockEvent | null {
     const settlementId = getTagValue(event.tags, 'd')
     if (!settlementId) return null
     return { ...event, kind: LOCK_KIND, parsedContent, settlementId }
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 // ============================================================================
@@ -181,7 +189,7 @@ export function validateMemberEvent(event: MemberEvent, ownerPubkey: string): bo
 export async function validateExpenseEvent(
   event: ExpenseEvent,
   inviteToken: string,
-  validMemberPubkeys: string[]
+  validMemberPubkeys: string[],
 ): Promise<{ isValid: boolean; capValid: boolean; memberValid: boolean }> {
   const capValid = await verifyCap(event.cap, inviteToken, event.pubkey)
   const memberValid = validMemberPubkeys.includes(event.parsedContent.member_pubkey)

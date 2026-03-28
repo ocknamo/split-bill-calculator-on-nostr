@@ -25,7 +25,12 @@ function createCalculatorStore() {
     members = members.map((m) => (m.id === id ? { ...m, ...updates } : m))
   }
 
-  function addExpense(input: { description: string; amount: number; paidById: string; currency: Currency }): void {
+  function addExpense(input: {
+    description: string
+    amount: number
+    paidById: string
+    currency: Currency
+  }): void {
     if (input.amount <= 0) throw new Error('金額は0より大きい値を入力してください')
     expenses = [...expenses, { id: generateId(), ...input }]
   }
@@ -44,11 +49,21 @@ function createCalculatorStore() {
   }
 
   return {
-    get members() { return members },
-    get expenses() { return expenses },
-    get currency() { return currency },
-    set currency(v: Currency) { currency = v },
-    get settlements(): SettlementsResult { return calculateSettlements(members, expenses) },
+    get members() {
+      return members
+    },
+    get expenses() {
+      return expenses
+    },
+    get currency() {
+      return currency
+    },
+    set currency(v: Currency) {
+      currency = v
+    },
+    get settlements(): SettlementsResult {
+      return calculateSettlements(members, expenses)
+    },
     addMember,
     removeMember,
     updateMember,

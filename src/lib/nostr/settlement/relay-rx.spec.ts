@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 
 // Mock rx-nostr before importing relay-rx
 vi.mock('rx-nostr', () => {

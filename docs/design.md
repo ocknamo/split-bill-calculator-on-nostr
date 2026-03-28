@@ -4,16 +4,16 @@
 
 ### 1.1 技術スタック
 
-| レイヤー | 技術 | バージョン |
-|---------|------|----------|
-| フレームワーク | Next.js (App Router) + React | 16 / 19 |
-| 言語 | TypeScript (strict) | - |
-| スタイリング | Tailwind CSS + Radix UI + shadcn/ui | v4 |
-| Nostrライブラリ | nostr-tools | v2.22.1 |
-| Nostrリアクティブ | rx-nostr | v3.6.2 |
-| テスト | Vitest + Testing Library | - |
-| Linter/Formatter | Biome | - |
-| 外部API | CoinGecko、LNURL | - |
+| レイヤー          | 技術                                | バージョン |
+| ----------------- | ----------------------------------- | ---------- |
+| フレームワーク    | Next.js (App Router) + React        | 16 / 19    |
+| 言語              | TypeScript (strict)                 | -          |
+| スタイリング      | Tailwind CSS + Radix UI + shadcn/ui | v4         |
+| Nostrライブラリ   | nostr-tools                         | v2.22.1    |
+| Nostrリアクティブ | rx-nostr                            | v3.6.2     |
+| テスト            | Vitest + Testing Library            | -          |
+| Linter/Formatter  | Biome                               | -          |
+| 外部API           | CoinGecko、LNURL                    | -          |
 
 ### 1.2 デフォルトNostrリレー
 
@@ -81,21 +81,21 @@ SplitCalculatorSync（メインコンテナ）
 
 ### 3.1 イベント種別
 
-| Kind | イベント名 | 用途 | 可変性 | 署名者 |
-|------|-----------|------|--------|--------|
-| 30050 | Settlement | 精算セッション定義（名前・通貨） | 置換可能（Parameterized Replaceable） | オーナーのみ |
-| 30051 | Member | メンバーリスト | 置換可能 | オーナーのみ |
-| 1052 | Expense | 支出記録 | 追記のみ（Append-only） | 招待トークン所持者 |
-| 30053 | Lock | 精算確定（採用イベントID指定） | 置換可能 | オーナーのみ |
+| Kind  | イベント名 | 用途                             | 可変性                                | 署名者             |
+| ----- | ---------- | -------------------------------- | ------------------------------------- | ------------------ |
+| 30050 | Settlement | 精算セッション定義（名前・通貨） | 置換可能（Parameterized Replaceable） | オーナーのみ       |
+| 30051 | Member     | メンバーリスト                   | 置換可能                              | オーナーのみ       |
+| 1052  | Expense    | 支出記録                         | 追記のみ（Append-only）               | 招待トークン所持者 |
+| 30053 | Lock       | 精算確定（採用イベントID指定）   | 置換可能                              | オーナーのみ       |
 
 ### 3.2 共通タグ構造
 
-| タグ | 値 | 説明 |
-|-----|-----|------|
-| `d` | settlementId（UUID v4） | 精算セッション識別子 |
-| `owner` | オーナーの公開鍵（hex） | セッションオーナーの識別 |
-| `invite_hash` | `SHA256(inviteToken)` | 招待トークンのハッシュ（セキュリティ境界） |
-| `cap` | `SHA256(inviteToken + pubkey)` | 支出イベントの認可証明（Expenseのみ） |
+| タグ          | 値                             | 説明                                       |
+| ------------- | ------------------------------ | ------------------------------------------ |
+| `d`           | settlementId（UUID v4）        | 精算セッション識別子                       |
+| `owner`       | オーナーの公開鍵（hex）        | セッションオーナーの識別                   |
+| `invite_hash` | `SHA256(inviteToken)`          | 招待トークンのハッシュ（セキュリティ境界） |
+| `cap`         | `SHA256(inviteToken + pubkey)` | 支出イベントの認可証明（Expenseのみ）      |
 
 ### 3.3 セキュリティモデル（Capability-based Access Control）
 
@@ -113,6 +113,7 @@ SplitCalculatorSync（メインコンテナ）
 ```
 
 **セキュリティ特性:**
+
 - inviteToken はリレーに送信されない → 傍受不可
 - cap は行為者ごとに異なる → リプレイ攻撃防止
 - エフェメラル鍵ペアで参加 → 匿名性の確保
@@ -126,9 +127,9 @@ SplitCalculatorSync（メインコンテナ）
 ```typescript
 // メンバー
 interface Member {
-  id: string           // UUID（スタンドアローン）or pubkey（同期）
+  id: string // UUID（スタンドアローン）or pubkey（同期）
   name: string
-  npub?: string        // Nostr公開鍵（bech32形式）
+  npub?: string // Nostr公開鍵（bech32形式）
   nostrProfile?: NostrProfile
 }
 
@@ -137,14 +138,14 @@ interface Expense {
   id: string
   description: string
   amount: number
-  paidById: string     // MemberのID
+  paidById: string // MemberのID
   currency: 'jpy' | 'usd'
 }
 
 // 精算結果
 interface Settlement {
-  from: string         // 支払う人のMemberID
-  to: string           // 受け取る人のMemberID
+  from: string // 支払う人のMemberID
+  to: string // 受け取る人のMemberID
   amount: number
 }
 ```
@@ -305,12 +306,12 @@ React setState() → UI 再レンダリング
 
 ### 7.3 接続ステータス
 
-| 状態 | 説明 |
-|------|------|
-| `connecting` | リレーへの接続試行中 |
-| `connected` | 接続成功・データ受信済み |
-| `disconnected` | 接続なし |
-| `error` | 接続エラー |
+| 状態           | 説明                     |
+| -------------- | ------------------------ |
+| `connecting`   | リレーへの接続試行中     |
+| `connected`    | 接続成功・データ受信済み |
+| `disconnected` | 接続なし                 |
+| `error`        | 接続エラー               |
 
 ---
 
@@ -367,14 +368,14 @@ React setState() → UI 再レンダリング
 
 **テストランナー:** Vitest + happy-dom + Testing Library
 
-| ファイル | テスト対象 |
-|---------|-----------|
-| `id.test.ts` | settlementId 生成・バリデーション |
-| `capability.test.ts` | CAP計算・検証ロジック |
-| `events.test.ts` | イベント生成・パース・バリデーション |
-| `state.test.ts` | buildSettlementState() のロジック |
-| `relay.test.ts` | リレー通信の抽象化 |
-| `hooks.test.ts` | useSettlementSync Reactフック統合 |
+| ファイル             | テスト対象                           |
+| -------------------- | ------------------------------------ |
+| `id.test.ts`         | settlementId 生成・バリデーション    |
+| `capability.test.ts` | CAP計算・検証ロジック                |
+| `events.test.ts`     | イベント生成・パース・バリデーション |
+| `state.test.ts`      | buildSettlementState() のロジック    |
+| `relay.test.ts`      | リレー通信の抽象化                   |
+| `hooks.test.ts`      | useSettlementSync Reactフック統合    |
 
 ---
 

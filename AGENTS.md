@@ -36,6 +36,7 @@ lib/nostr/settlement/  # Nostr Settlement プロトコルの実装
 ### データフロー
 
 #### スタンドアロンモード
+
 ```
 User Input → React State → SessionStorage
                 ↓
@@ -45,6 +46,7 @@ User Input → React State → SessionStorage
 ```
 
 #### 同期モード
+
 ```
 User Input → React State → Nostr Event → Relay
                               ↓
@@ -71,6 +73,7 @@ pnpm format
 ```
 
 **Biome設定** (`biome.json`):
+
 - インデントスタイル: スペース2つ
 - クォートスタイル: シングルクォート
 - セミコロン: 必要な場合のみ (`asNeeded`)
@@ -143,20 +146,21 @@ const isValid = await verifyCap(cap, inviteToken, actorPubkey)
 
 ```typescript
 const {
-  state,           // SettlementState | null
-  isLoading,       // boolean
-  error,           // string | null
-  isLocked,        // boolean
-  isOwner,         // boolean
-  connectionStatus,// ConnectionStatus
-  addExpense,      // (memberPubkey, amount, currency, note) => Promise<void>
-  addMember,       // (pubkey, name) => Promise<void>
-  lockSettlement,  // (acceptedEventIds) => Promise<void>
-  refresh,         // () => Promise<void>
+  state, // SettlementState | null
+  isLoading, // boolean
+  error, // string | null
+  isLocked, // boolean
+  isOwner, // boolean
+  connectionStatus, // ConnectionStatus
+  addExpense, // (memberPubkey, amount, currency, note) => Promise<void>
+  addMember, // (pubkey, name) => Promise<void>
+  lockSettlement, // (acceptedEventIds) => Promise<void>
+  refresh, // () => Promise<void>
 } = useSettlementSync({ settlementId, inviteToken, relays })
 ```
 
-**注意**: 
+**注意**:
+
 - `addExpense`は誰でも呼べますが、capability検証が必要
 - `addMember`と`lockSettlement`はOwnerのみ有効
 
@@ -167,7 +171,7 @@ Settlement、Member、Lockイベントは`d`タグで識別され、同じ`d`タ
 ```typescript
 // 最新のイベントを取得
 const latest = events.reduce((latest, current) =>
-  current.created_at > latest.created_at ? current : latest
+  current.created_at > latest.created_at ? current : latest,
 )
 ```
 
@@ -182,6 +186,7 @@ pnpm test:run
 ```
 
 **テスト対象**:
+
 - ID生成・検証
 - Capability計算・検証
 - イベント作成・パース
@@ -200,13 +205,13 @@ pnpm test:run
 
 ```typescript
 // イベントのログ出力
-console.log("[v0] Event:", JSON.stringify(event, null, 2))
+console.log('[v0] Event:', JSON.stringify(event, null, 2))
 
 // Relay接続状態の確認
-console.log("[v0] Connection status:", connectionStatus)
+console.log('[v0] Connection status:', connectionStatus)
 
 // State構築の確認
-console.log("[v0] Settlement state:", state)
+console.log('[v0] Settlement state:', state)
 ```
 
 ## パフォーマンス最適化
@@ -248,7 +253,7 @@ console.log("[v0] Settlement state:", state)
 ```typescript
 // lib/constants.ts
 export const COINGECKO_API_URL =
-  "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy,usd"
+  'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy,usd'
 ```
 
 **レート制限**: 無料プランは制限あり。`use-btc-price.ts`でエラーハンドリング実装済み。
@@ -289,6 +294,7 @@ const invoice = await fetchLightningInvoice(callback, amountMsat)
 ```
 
 **Type**:
+
 - `feat`: 新機能
 - `fix`: バグ修正
 - `docs`: ドキュメント

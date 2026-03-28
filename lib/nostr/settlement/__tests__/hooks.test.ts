@@ -113,7 +113,7 @@ describe('useInviteLink', () => {
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
         baseUrl: 'https://example.com/join',
-      })
+      }),
     )
 
     expect(result.current.inviteLink).toBe('https://example.com/join?s=settlement-123&t=token-abc')
@@ -130,7 +130,7 @@ describe('useInviteLink', () => {
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
         baseUrl: 'https://example.com/join',
-      })
+      }),
     )
 
     await act(async () => {
@@ -153,7 +153,7 @@ describe('useInviteLink', () => {
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
         baseUrl: 'https://example.com/join',
-      })
+      }),
     )
 
     await act(async () => {
@@ -182,7 +182,7 @@ describe('useSettlementSync', () => {
       useSettlementSync({
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
-      })
+      }),
     )
 
     expect(result.current.isLoading).toBe(true)
@@ -195,7 +195,7 @@ describe('useSettlementSync', () => {
       useSettlementSync({
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
-      })
+      }),
     )
 
     expect(result.current.addExpense).toBeDefined()
@@ -207,7 +207,7 @@ describe('useSettlementSync', () => {
       useSettlementSync({
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
-      })
+      }),
     )
 
     expect(result.current.addMember).toBeDefined()
@@ -219,7 +219,7 @@ describe('useSettlementSync', () => {
       useSettlementSync({
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
-      })
+      }),
     )
 
     expect(result.current.lockSettlement).toBeDefined()
@@ -231,7 +231,7 @@ describe('useSettlementSync', () => {
       useSettlementSync({
         settlementId: 'settlement-123',
         inviteToken: 'token-abc',
-      })
+      }),
     )
 
     // アンマウント時にエラーが発生しないことを確認

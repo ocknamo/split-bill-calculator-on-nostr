@@ -100,7 +100,7 @@ export async function fetchNostrProfile(npub: string): Promise<NostrProfile | nu
             finish(null)
           }
         },
-      }
+      },
     )
   })
 }

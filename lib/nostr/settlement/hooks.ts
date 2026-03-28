@@ -46,7 +46,7 @@ export function parseInviteLink(url: string): { settlementId: string; inviteToke
 export function generateInviteLink(
   settlementId: string,
   inviteToken: string,
-  baseUrl: string
+  baseUrl: string,
 ): string {
   const url = new URL(baseUrl)
   url.searchParams.set('s', settlementId)
@@ -107,7 +107,7 @@ export interface CreateSettlementResult {
 }
 
 export async function createSettlement(
-  params: CreateSettlementParams
+  params: CreateSettlementParams,
 ): Promise<CreateSettlementResult> {
   const { settlementId, inviteToken, name, currency, relays = DEFAULT_RELAYS } = params
 
@@ -176,7 +176,7 @@ export interface UseSettlementSyncResult {
     memberPubkey: string,
     amount: number,
     currency: string,
-    note: string
+    note: string,
   ) => Promise<void>
   addMember: (pubkey: string, name: string, picture?: string, lud16?: string) => Promise<void>
   lockSettlement: (acceptedEventIds: string[]) => Promise<void>
@@ -296,7 +296,7 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
       await clientRef.current.publish(event)
       handleEvent(event)
     },
-    [settlementId, inviteToken, handleEvent]
+    [settlementId, inviteToken, handleEvent],
   )
 
   // Member追加（Owner権限が必要）
@@ -337,7 +337,7 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
       await clientRef.current.publish(event)
       handleEvent(event)
     },
-    [settlementId, state?.members, handleEvent]
+    [settlementId, state?.members, handleEvent],
   )
 
   // Settlementをロック（Owner権限が必要）
@@ -359,7 +359,7 @@ export function useSettlementSync(options: UseSettlementSyncOptions): UseSettlem
       await clientRef.current.publish(event)
       handleEvent(event)
     },
-    [settlementId, handleEvent]
+    [settlementId, handleEvent],
   )
 
   // 再取得

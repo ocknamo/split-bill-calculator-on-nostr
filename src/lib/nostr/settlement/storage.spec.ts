@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 
 // browser=false is the default in our mock (src/mocks/app-environment.ts)
 // All localStorage-dependent functions should be no-ops when browser=false
@@ -77,7 +77,7 @@ describe('storage helpers', () => {
       Object.entries(parsed).filter(([, entry]) => {
         const e = entry as { createdAt: number }
         return now - e.createdAt <= thirtyDays
-      })
+      }),
     )
     expect(Object.keys(cleaned)).toHaveLength(1)
     expect(Object.keys(cleaned)[0]).toBe('recent')

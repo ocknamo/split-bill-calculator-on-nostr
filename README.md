@@ -23,6 +23,7 @@
 ## 技術スタック
 
 ### フロントエンド
+
 - **Next.js 16** (React 19) - App Router
 - **TypeScript** - 型安全性
 - **Tailwind CSS** - スタイリング
@@ -30,15 +31,18 @@
 - **Lucide React** - アイコン
 
 ### Nostr統合
+
 - **nostr-tools** - Nostrプロトコル実装
 - **カスタムSettlementプロトコル** - 割り勘専用のイベント設計
 
 ### 状態管理・データ永続化
+
 - **React Hooks** - ローカル状態管理
 - **SessionStorage** - スタンドアロンモードのデータ永続化
 - **Nostr Relays** - 同期モードの分散データストレージ
 
 ### テスト
+
 - **Vitest** - ユニットテスト
 - **Testing Library** - コンポーネントテスト
 
@@ -116,12 +120,12 @@ split-bill-calculator-on-nostr/
 
 ### イベント種別
 
-| Kind | 名前 | 説明 | 署名者 |
-|------|------|------|--------|
-| `38400` | Settlement | 精算セッションの定義 | Owner |
-| `38401` | Member | メンバーリスト | Owner |
-| `38402` | Expense | 支出記録 | 任意の参加者 (capability検証) |
-| `38403` | Lock | 精算のロック（確定） | Owner |
+| Kind    | 名前       | 説明                 | 署名者                        |
+| ------- | ---------- | -------------------- | ----------------------------- |
+| `38400` | Settlement | 精算セッションの定義 | Owner                         |
+| `38401` | Member     | メンバーリスト       | Owner                         |
+| `38402` | Expense    | 支出記録             | 任意の参加者 (capability検証) |
+| `38403` | Lock       | 精算のロック（確定） | Owner                         |
 
 ### アーキテクチャの特徴
 

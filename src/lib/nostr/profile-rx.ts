@@ -70,8 +70,12 @@ export async function fetchNostrProfile(npub: string): Promise<NostrProfile | nu
             finish(null)
           }
         },
-        complete: () => { if (!resolved) finish(null) },
-        error: () => { finish(null) },
+        complete: () => {
+          if (!resolved) finish(null)
+        },
+        error: () => {
+          finish(null)
+        },
       })
 
     rxReq.emit({ kinds: [0], authors: [pubkey], limit: 1 })
