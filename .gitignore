@@ -7,6 +7,9 @@
 /.next/
 /out/
 
+# SvelteKit
+/.svelte-kit/
+
 # production
 /build
 
