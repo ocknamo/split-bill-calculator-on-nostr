@@ -24,21 +24,24 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'pnpm'
+          cache-dependency-path: packages/app/pnpm-lock.yaml
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
+        working-directory: packages/app
         run: pnpm install --frozen-lockfile
 
       - name: Build site
+        working-directory: packages/app
         env:
           NODE_ENV: production
         run: pnpm run build
@@ -46,7 +49,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./out
+          path: packages/app/build
 
   deploy:
     environment:
