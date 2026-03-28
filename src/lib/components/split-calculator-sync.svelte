@@ -24,7 +24,9 @@
     initialInviteToken?: string | null
   } = $props()
 
+  // svelte-ignore state_referenced_locally
   let settlementId = $state<string | null>(initialSettlementId)
+  // svelte-ignore state_referenced_locally
   let inviteToken = $state<string | null>(initialInviteToken)
   let sync = $state<SettlementSync | null>(null)
   let currency = $state<Currency>('jpy')
