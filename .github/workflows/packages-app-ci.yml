@@ -1,0 +1,44 @@
+name: packages/app CI
+
+on:
+  push:
+    branches: ['claude/migrate-vite-plus-TtcEr', 'main']
+    paths: ['packages/app/**']
+  pull_request:
+    branches: ['main']
+    paths: ['packages/app/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: packages/app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Type check
+        run: pnpm run check
+
+      # Uncomment when UI migration is complete
+      # - name: Build
+      #   run: pnpm run build
