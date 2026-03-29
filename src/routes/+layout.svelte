@@ -1,5 +1,8 @@
 <script lang="ts">
   import './layout.css'
+  import { createConsoleViewer } from 'console-daijin'
+
+  createConsoleViewer()
 
   let { children } = $props()
 </script>

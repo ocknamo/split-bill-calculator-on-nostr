@@ -14,6 +14,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      console-daijin:
+        specifier: ^0.1.5
+        version: 0.1.5
       lucide-svelte:
         specifier: ^1.0.1
         version: 1.0.1(svelte@5.55.0)
@@ -733,6 +736,9 @@ packages:
 
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
+
+  console-daijin@0.1.5:
+    resolution: {integrity: sha512-TZnmOC7Qv7sOWwVWd6zxaKqeuhoNwObwOiaJ9IYmy4U1jkRIBplOQaUWT79DRuziMUUEH4u3efsgpvenW710fA==}
 
   cookie@0.6.0:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
@@ -1779,6 +1785,8 @@ snapshots:
       color-name: 1.1.4
 
   color-name@1.1.4: {}
+
+  console-daijin@0.1.5: {}
 
   cookie@0.6.0: {}
 
