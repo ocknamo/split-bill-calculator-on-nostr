@@ -1,8 +1,9 @@
 <script lang="ts">
   import './layout.css'
+  import { onMount } from 'svelte'
   import { createConsoleViewer } from 'console-daijin'
 
-  createConsoleViewer()
+  onMount(() => createConsoleViewer())
 
   let { children } = $props()
 </script>
