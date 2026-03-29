@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vp dev",
-    "build": "vp build",
-    "preview": "vp preview",
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "test": "vp test --run",
-    "test:watch": "vp test"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@rx-nostr/crypto": "^0.0.0",
@@ -38,6 +38,7 @@
     "svelte-check": "^4.4.2",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "vite-plus": "^0.1.14"
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
   }
 }

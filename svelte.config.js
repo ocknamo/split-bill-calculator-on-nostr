@@ -15,9 +15,6 @@ const config = {
   },
   kit: {
     adapter: adapter({ fallback: 'index.html' }),
-    alias: {
-      vitest: "./node_modules/vite-plus/dist/test/index.d.ts",
-    },
   },
 };
 

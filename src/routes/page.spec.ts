@@ -3,34 +3,49 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Page from './+page.svelte'
 
 // vi.hoisted でモッククラスをホイスト（vi.mock より先に評価される）
-const { MockSettlementSync, mockParseInviteLink, mockCreateSettlement, mockGenerateInviteLink } =
-  vi.hoisted(() => {
-    const mockParseInviteLink = vi.fn().mockReturnValue(null)
-    const mockCreateSettlement = vi.fn().mockResolvedValue({})
-    const mockGenerateInviteLink = vi.fn().mockReturnValue('/join?s=test-id&t=test-token')
+const {
+  MockSettlementSync,
+  mockParseInviteLink,
+  mockCreateSettlement,
+  mockGenerateInviteLink,
+  mockGenerateInviteToken,
+  mockGenerateSettlementId,
+} = vi.hoisted(() => {
+  const mockParseInviteLink = vi.fn().mockReturnValue(null)
+  const mockCreateSettlement = vi.fn().mockResolvedValue({})
+  const mockGenerateInviteLink = vi.fn().mockReturnValue('/join?s=test-id&t=test-token')
+  const mockGenerateInviteToken = vi.fn().mockReturnValue('test-invite-token')
+  const mockGenerateSettlementId = vi.fn().mockReturnValue('test-settlement-id')
 
-    class MockSettlementSync {
-      isLoading = false
-      connectionStatus = 'disconnected'
-      error = null
-      isOwner = false
-      members: never[] = []
-      expenses: never[] = []
-      settlements: never[] = []
-      isClosed = false
-      currency = 'jpy'
-      settlementName = ''
+  class MockSettlementSync {
+    isLoading = false
+    connectionStatus = 'disconnected'
+    error = null
+    isOwner = false
+    members: never[] = []
+    expenses: never[] = []
+    settlements: never[] = []
+    isClosed = false
+    currency = 'jpy'
+    settlementName = ''
 
-      init = vi.fn().mockResolvedValue(undefined)
-      addMember = vi.fn()
-      addExpense = vi.fn()
-      lockSettlement = vi.fn()
-      refresh = vi.fn()
-      destroy = vi.fn()
-    }
+    init = vi.fn().mockResolvedValue(undefined)
+    addMember = vi.fn()
+    addExpense = vi.fn()
+    lockSettlement = vi.fn()
+    refresh = vi.fn()
+    destroy = vi.fn()
+  }
 
-    return { MockSettlementSync, mockParseInviteLink, mockCreateSettlement, mockGenerateInviteLink }
-  })
+  return {
+    MockSettlementSync,
+    mockParseInviteLink,
+    mockCreateSettlement,
+    mockGenerateInviteLink,
+    mockGenerateInviteToken,
+    mockGenerateSettlementId,
+  }
+})
 
 vi.mock('$lib/nostr/settlement/settlement-sync.svelte', () => ({
   parseInviteLink: mockParseInviteLink,
@@ -40,11 +55,11 @@ vi.mock('$lib/nostr/settlement/settlement-sync.svelte', () => ({
 }))
 
 vi.mock('$lib/nostr/settlement/capability', () => ({
-  generateInviteToken: vi.fn().mockReturnValue('test-invite-token'),
+  generateInviteToken: mockGenerateInviteToken,
 }))
 
 vi.mock('$lib/nostr/settlement/id', () => ({
-  generateSettlementId: vi.fn().mockReturnValue('test-settlement-id'),
+  generateSettlementId: mockGenerateSettlementId,
 }))
 
 vi.mock('$lib/nostr/settlement/storage', () => ({
@@ -66,6 +81,8 @@ describe('ページルート (+page.svelte)', () => {
   beforeEach(() => {
     vi.spyOn(history, 'replaceState').mockImplementation(() => {})
     mockParseInviteLink.mockReturnValue(null)
+    mockGenerateSettlementId.mockReturnValue('test-settlement-id')
+    mockGenerateInviteToken.mockReturnValue('test-invite-token')
   })
 
   afterEach(() => {
