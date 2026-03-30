@@ -4,4 +4,8 @@ import { sveltekit } from "@sveltejs/kit/vite";
 
 export default defineConfig({
   plugins: [tailwindcss(), sveltekit()],
+  server: {
+    // Allow StackBlitz and other WebContainer proxied hostnames
+    allowedHosts: "all",
+  },
 });
