@@ -4,6 +4,7 @@
   import { generateSettlementId } from '$lib/nostr/settlement/id'
   import { cleanupOldOwnerKeys } from '$lib/nostr/settlement/storage'
   import type { Currency } from '$lib/types/split-calculator'
+  import { base } from '$app/paths'
   import CreateSettlementDialog from '$lib/components/CreateSettlementDialog.svelte'
   import SplitCalculator from '$lib/components/SplitCalculator.svelte'
   import SplitCalculatorSync from '$lib/components/SplitCalculatorSync.svelte'
@@ -34,7 +35,7 @@
     mode = newMode
     if (newMode === 'standalone') {
       syncSession = null
-      history.replaceState(null, '', '/')
+      history.replaceState(null, '', base || '/')
     }
   }
 
@@ -47,7 +48,7 @@
     syncSession = { settlementId, inviteToken }
     mode = 'sync'
 
-    const link = generateInviteLink(settlementId, inviteToken, window.location.origin)
+    const link = generateInviteLink(settlementId, inviteToken, window.location.origin + base)
     history.replaceState(null, '', link)
 
     showToast('精算を作成しました')
@@ -56,7 +57,7 @@
   function handleBack() {
     syncSession = null
     mode = 'standalone'
-    history.replaceState(null, '', '/')
+    history.replaceState(null, '', base || '/')
   }
 </script>
 
