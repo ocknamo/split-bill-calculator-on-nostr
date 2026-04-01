@@ -62,6 +62,10 @@ vi.mock('$lib/nostr/settlement/id', () => ({
   generateSettlementId: mockGenerateSettlementId,
 }))
 
+vi.mock('$app/paths', () => ({
+  base: '/split-bill-calculator-on-nostr',
+}))
+
 vi.mock('$lib/nostr/settlement/storage', () => ({
   cleanupOldOwnerKeys: vi.fn(),
   loadOwnerKey: vi.fn().mockReturnValue(null),
@@ -139,7 +143,7 @@ describe('ページルート (+page.svelte)', () => {
   })
 
   describe('モード切替: 同期モード → スタンドアロン', () => {
-    it('同期モードから戻るボタンでスタンドアロンに戻り history.replaceState が "/" で呼ばれる', async () => {
+    it('同期モードから戻るボタンでスタンドアロンに戻り history.replaceState が base path で呼ばれる', async () => {
       mockParseInviteLink.mockReturnValue({
         settlementId: 'test-id',
         inviteToken: 'test-token',
@@ -162,7 +166,7 @@ describe('ページルート (+page.svelte)', () => {
       await waitFor(
         () => {
           expect(screen.getByRole('heading', { name: 'ワリカンさん' })).toBeInTheDocument()
-          expect(history.replaceState).toHaveBeenCalledWith(null, '', '/')
+          expect(history.replaceState).toHaveBeenCalledWith(null, '', '/split-bill-calculator-on-nostr')
         },
         { timeout: 3000 },
       )
