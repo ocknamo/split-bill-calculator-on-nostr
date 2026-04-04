@@ -1,7 +1,7 @@
 /**
  * Relay通信層 (rx-nostr版)
  */
-import { createRxBackwardReq, uniq } from "rx-nostr";
+import { createRxBackwardReq, createRxForwardReq, uniq } from "rx-nostr";
 import { getRxNostr } from "$lib/nostr/rx-nostr-client";
 import { EXPENSE_KIND, LOCK_KIND, MEMBER_KIND, SETTLEMENT_KIND } from "./events/types";
 import type { NostrEvent } from "./events/types";
@@ -24,6 +24,7 @@ export interface Subscription {
 
 export interface RelayClient {
   subscribe: (options: SubscriptionOptions) => Subscription;
+  subscribeForward: (options: SubscriptionOptions) => Subscription;
   publish: (event: NostrEvent) => Promise<void>;
   close: () => void;
 }
@@ -52,6 +53,27 @@ export function createRelayClient(config: RelayConfig): RelayClient {
         close: () => {
           subscription.unsubscribe();
           rxReq.over();
+        },
+      };
+    },
+
+    subscribeForward(options: SubscriptionOptions): Subscription {
+      const { settlementId, kinds, onEvent } = options;
+      const filterKinds = kinds ?? [SETTLEMENT_KIND, MEMBER_KIND, EXPENSE_KIND, LOCK_KIND];
+      const rxReq = createRxForwardReq();
+
+      const subscription = rxNostr
+        .use(rxReq, { relays })
+        .pipe(uniq())
+        .subscribe({
+          next: (packet) => onEvent(packet.event as NostrEvent),
+        });
+
+      rxReq.emit({ kinds: filterKinds, "#d": [settlementId] });
+
+      return {
+        close: () => {
+          subscription.unsubscribe();
         },
       };
     },

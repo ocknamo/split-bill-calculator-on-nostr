@@ -2,8 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generateInviteLink, parseInviteLink, SettlementSync } from "./settlement-sync.svelte";
 
 // Mock relay-rx
+const mockForwardSubClose = vi.fn();
 const mockRelayClient = {
   subscribe: vi.fn(() => ({ close: vi.fn() })),
+  subscribeForward: vi.fn(() => ({ close: mockForwardSubClose })),
   publish: vi.fn().mockResolvedValue(undefined),
   close: vi.fn(),
 };
@@ -158,6 +160,38 @@ describe("SettlementSync", () => {
 
     expect(sync.isLoading).toBe(false);
     expect(sync.connectionStatus).toBe("connected");
+  });
+
+  it("should start forward subscription after successful init", async () => {
+    const { fetchSettlementEvents } = await import("$lib/nostr/settlement/relay-rx");
+    vi.mocked(fetchSettlementEvents).mockResolvedValueOnce([]);
+
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+
+    await sync.init();
+
+    expect(mockRelayClient.subscribeForward).toHaveBeenCalledWith(
+      expect.objectContaining({ settlementId: "settlement-123" }),
+    );
+  });
+
+  it("should close forward subscription on destroy after init", async () => {
+    const { fetchSettlementEvents } = await import("$lib/nostr/settlement/relay-rx");
+    vi.mocked(fetchSettlementEvents).mockResolvedValueOnce([]);
+
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+
+    await sync.init();
+    mockForwardSubClose.mockClear();
+    sync.destroy();
+
+    expect(mockForwardSubClose).toHaveBeenCalled();
   });
 
   it("should set error and disconnected status on init failure", async () => {
