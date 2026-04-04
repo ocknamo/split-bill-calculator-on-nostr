@@ -3,7 +3,7 @@
   import { onMount } from 'svelte'
   import { createConsoleViewer } from 'console-daijin'
 
-  onMount(() => createConsoleViewer())
+  onMount(() => createConsoleViewer({ show: 'iframe' }))
 
   let { children } = $props()
 </script>
