@@ -123,7 +123,14 @@
             type="text"
             placeholder="npub1..."
             bind:value={newNpub}
-            oninput={() => (nostrError = null)}
+            oninput={() => {
+              const val = newNpub.trim()
+              if (val && !isValidNpub(val)) {
+                nostrError = '無効なnpubです。npub1...の形式で入力してください'
+              } else {
+                nostrError = null
+              }
+            }}
             onkeydown={(e) => e.key === 'Enter' && addByNostr()}
             class="flex-1 rounded-lg border-2 border-gray-200 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none {nostrError
               ? 'border-red-400'
@@ -131,7 +138,7 @@
           />
           <button
             onclick={addByNostr}
-            disabled={!newNpub.trim() || loadingNostr}
+            disabled={!newNpub.trim() || !isValidNpub(newNpub.trim()) || loadingNostr}
             class="flex shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-40"
           >
             {#if loadingNostr}
