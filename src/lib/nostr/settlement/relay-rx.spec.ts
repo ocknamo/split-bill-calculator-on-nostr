@@ -13,6 +13,9 @@ const mockRxReq = {
   emit: vi.fn(),
   over: vi.fn(),
 };
+const mockForwardRxReq = {
+  emit: vi.fn(),
+};
 const mockRxNostr = {
   use: vi.fn(),
   send: vi.fn(),
@@ -27,6 +30,7 @@ vi.mock("rx-nostr", async () => {
   return {
     ...actual,
     createRxBackwardReq: vi.fn(() => mockRxReq),
+    createRxForwardReq: vi.fn(() => mockForwardRxReq),
   };
 });
 
@@ -48,9 +52,10 @@ describe("createRelayClient", () => {
   beforeEach(() => vi.clearAllMocks());
   afterEach(() => vi.clearAllMocks());
 
-  it("should expose subscribe, publish, close", () => {
+  it("should expose subscribe, subscribeForward, publish, close", () => {
     const client = createRelayClient(config);
     expect(client.subscribe).toBeDefined();
+    expect(client.subscribeForward).toBeDefined();
     expect(client.publish).toBeDefined();
     expect(client.close).toBeDefined();
   });
@@ -121,6 +126,48 @@ describe("createRelayClient", () => {
 
       expect(mockSubscription.unsubscribe).toHaveBeenCalled();
       expect(mockRxReq.over).toHaveBeenCalled();
+    });
+  });
+
+  describe("subscribeForward", () => {
+    it("should emit filter with all kinds by default", () => {
+      const obs = makeObservable([], false);
+      mockRxNostr.use.mockReturnValue(obs);
+
+      const options: SubscriptionOptions = {
+        settlementId: "sid",
+        onEvent: vi.fn(),
+      };
+      createRelayClient(config).subscribeForward(options);
+
+      expect(mockForwardRxReq.emit).toHaveBeenCalledWith({
+        kinds: [SETTLEMENT_KIND, MEMBER_KIND, EXPENSE_KIND, LOCK_KIND],
+        "#d": ["sid"],
+      });
+    });
+
+    it("should call onEvent for each received packet", () => {
+      const mockEvent = { id: "e1", kind: EXPENSE_KIND };
+      const obs = makeObservable([{ event: mockEvent }], false);
+      mockRxNostr.use.mockReturnValue(obs);
+
+      const onEvent = vi.fn();
+      createRelayClient(config).subscribeForward({ settlementId: "sid", onEvent });
+
+      expect(onEvent).toHaveBeenCalledWith(mockEvent);
+    });
+
+    it("should return close handle that unsubscribes without calling over", () => {
+      const obs = makeObservable([], false);
+      mockRxNostr.use.mockReturnValue(obs);
+
+      const sub = createRelayClient(config).subscribeForward({
+        settlementId: "sid",
+        onEvent: vi.fn(),
+      });
+      sub.close();
+
+      expect(mockSubscription.unsubscribe).toHaveBeenCalled();
     });
   });
 

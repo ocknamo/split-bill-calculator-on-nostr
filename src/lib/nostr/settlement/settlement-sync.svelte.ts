@@ -15,6 +15,7 @@ import {
   fetchSettlementEvents,
   type RelayClient,
   type RelayConfig,
+  type Subscription,
 } from "./relay-rx";
 import { buildSettlementState, type SettlementState } from "./state";
 import { loadOwnerKey, saveOwnerKey } from "./storage";
@@ -126,6 +127,7 @@ export class SettlementSync {
   #events: NostrEvent[] = [];
   #seenIds = new Set<string>();
   #client: RelayClient | null = null;
+  #forwardSub: Subscription | null = null;
   #actorSk: Uint8Array;
   #actorPubkey: string;
   #ownerKey: { sk: Uint8Array; pubkey: string } | null = null;
@@ -186,6 +188,10 @@ export class SettlementSync {
       }
 
       this.#client = createRelayClient(config);
+      this.#forwardSub = this.#client.subscribeForward({
+        settlementId: this.#settlementId,
+        onEvent: (event) => this.#handleEvent(event),
+      });
       this.isLoading = false;
       this.connectionStatus = "connected";
     } catch (err) {
@@ -290,6 +296,8 @@ export class SettlementSync {
   }
 
   destroy(): void {
+    this.#forwardSub?.close();
+    this.#forwardSub = null;
     this.#client?.close();
     this.#client = null;
   }
