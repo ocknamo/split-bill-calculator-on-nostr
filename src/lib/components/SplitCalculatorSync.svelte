@@ -146,6 +146,7 @@
       {isLocked}
       {inviteLink}
       connectionStatus={sync.connectionStatus}
+      onRefresh={() => sync.refresh()}
     />
 
     {#if sync.error}

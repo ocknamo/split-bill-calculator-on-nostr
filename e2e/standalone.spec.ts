@@ -34,7 +34,7 @@ test.describe('スタンドアローンモード', () => {
     await addExpense(page, 'ランチ代', 3000);
 
     await expect(page.getByText('ランチ代')).toBeVisible();
-    await expect(page.getByText('3,000')).toBeVisible();
+    await expect(page.getByText('￥3,000').first()).toBeVisible();
   });
 
   test('A4: 支出複数追加', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('スタンドアローンモード', () => {
     await addExpense(page, 'ランチ代', 3000, 0);
 
     // 3000 / 2 = 1500 per person
-    await expect(page.getByText('1,500')).toBeVisible();
+    await expect(page.getByText('￥1,500').first()).toBeVisible();
   });
 
   test('A6: メンバー削除', async ({ page }) => {
@@ -115,7 +115,7 @@ test.describe('スタンドアローンモード', () => {
     await addExpense(page, 'ランチ代', 30);
 
     // Should show $ symbol in the expense display
-    await expect(page.getByText('$')).toBeVisible();
+    await expect(page.getByText('$30.00').first()).toBeVisible();
   });
 
   test('A11: BTC価格表示', async ({ page }) => {
@@ -135,7 +135,7 @@ test.describe('スタンドアローンモード', () => {
     await page.waitForLoadState('networkidle');
 
     // Data should persist via sessionStorage
-    await expect(page.getByText('田中')).toBeVisible();
+    await expect(page.getByRole('button', { name: '田中を削除' })).toBeVisible();
     await expect(page.getByText('ランチ代')).toBeVisible();
   });
 

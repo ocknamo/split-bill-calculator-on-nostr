@@ -27,7 +27,7 @@
       </h2>
     </div>
     <ul class="divide-y divide-gray-50">
-      {#each expenses as expense (expense.id)}
+      {#each [...expenses].reverse() as expense (expense.id)}
         {@const payer = getMember(expense.paidById)}
         <li class="flex items-center gap-3 px-4 py-3">
           {#if payer}

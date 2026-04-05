@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Check, Copy, Lock, Share2, Wifi, WifiOff, AlertCircle } from 'lucide-svelte'
+  import { Check, Copy, Lock, RefreshCw, Share2, Wifi, WifiOff, AlertCircle } from 'lucide-svelte'
   import type { ConnectionStatus } from '$lib/nostr/settlement/settlement-sync.svelte'
 
   interface Props {
@@ -8,9 +8,10 @@
     isLocked: boolean
     inviteLink: string
     connectionStatus: ConnectionStatus
+    onRefresh?: () => void
   }
 
-  let { name, isOwner, isLocked, inviteLink, connectionStatus }: Props = $props()
+  let { name, isOwner, isLocked, inviteLink, connectionStatus, onRefresh }: Props = $props()
 
   let copied = $state(false)
 
@@ -67,6 +68,18 @@
         <WifiOff class="h-4 w-4 {statusColor}" aria-label={statusLabel} />
       {:else}
         <Wifi class="h-4 w-4 {statusColor}" aria-label={statusLabel} />
+      {/if}
+
+      <!-- Refresh button -->
+      {#if onRefresh}
+        <button
+          onclick={onRefresh}
+          disabled={connectionStatus === 'connecting'}
+          class="rounded-lg border border-gray-200 p-1 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+          aria-label="再同期"
+        >
+          <RefreshCw class="h-3.5 w-3.5 {connectionStatus === 'connecting' ? 'animate-spin' : ''}" />
+        </button>
       {/if}
 
       <!-- Copy invite link -->

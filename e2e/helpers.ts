@@ -19,8 +19,8 @@ export async function addMemberByName(page: Page, name: string): Promise<void> {
   await nameInput.fill(name);
   // Click the "追加" button next to the name input (they share the same flex container)
   await nameInput.locator('..').getByRole('button', { name: '追加' }).click();
-  // Wait for member to appear in the list
-  await page.getByText(name).waitFor();
+  // Wait for member to appear in the list (use aria-label of delete button as stable locator)
+  await page.getByRole('button', { name: `${name}を削除` }).waitFor();
 }
 
 /**
