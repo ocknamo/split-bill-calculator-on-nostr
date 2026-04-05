@@ -92,9 +92,9 @@ test.describe('スタンドアローンモード', () => {
   test('A9: 空のメンバー名は追加不可', async ({ page }) => {
     await page.getByRole('button', { name: '名前で追加' }).click();
 
-    // The add button in the member section should be disabled when name is empty
-    const memberSection = page.locator('.mb-6.rounded-xl').first();
-    const addButton = memberSection.getByRole('button', { name: '追加' });
+    // The add button next to the name input should be disabled when name is empty
+    const nameInput = page.getByPlaceholder('名前を入力');
+    const addButton = nameInput.locator('..').getByRole('button', { name: '追加' });
     await expect(addButton).toBeDisabled();
   });
 

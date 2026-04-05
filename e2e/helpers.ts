@@ -15,10 +15,10 @@ export async function getMemberCount(page: Page): Promise<number> {
  */
 export async function addMemberByName(page: Page, name: string): Promise<void> {
   await page.getByRole('button', { name: '名前で追加' }).click();
-  await page.getByPlaceholder('名前を入力').fill(name);
-  // Click the add button within the member section (above the expense form)
-  const memberSection = page.locator('.mb-6.rounded-xl').first();
-  await memberSection.getByRole('button', { name: '追加' }).click();
+  const nameInput = page.getByPlaceholder('名前を入力');
+  await nameInput.fill(name);
+  // Click the "追加" button next to the name input (they share the same flex container)
+  await nameInput.locator('..').getByRole('button', { name: '追加' }).click();
   // Wait for member to appear in the list
   await page.getByText(name).waitFor();
 }
@@ -45,9 +45,8 @@ export async function addExpense(
     }
   }
 
-  // Click the add button within the expense form section
-  const expenseForm = page.locator('#expense-desc').locator('..').locator('..');
-  await expenseForm.getByRole('button', { name: '追加' }).click();
+  // Click the add button in the expense form (identified by being near #expense-desc)
+  await page.locator('#expense-desc').locator('..').locator('..').getByRole('button', { name: '追加' }).click();
   // Wait for the expense to appear
   await page.getByText(description).waitFor();
 }
