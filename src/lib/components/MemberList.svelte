@@ -11,9 +11,10 @@
     onRemoveMember: (id: string) => void
     formatCurrency: (amount: number) => string
     getMemberPaidTotal: (memberId: string) => number
+    isOwner?: boolean
   }
 
-  let { members, onAddMember, onRemoveMember, formatCurrency, getMemberPaidTotal }: Props =
+  let { members, onAddMember, onRemoveMember, formatCurrency, getMemberPaidTotal, isOwner = true }: Props =
     $props()
 
   let addMode = $state<'name' | 'nostr'>('name')
@@ -75,6 +76,7 @@
     </h2>
   </div>
   <div class="p-4">
+    {#if isOwner}
     <!-- Tab switcher -->
     <div class="mb-4 grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1">
       <button
@@ -160,6 +162,11 @@
         {/if}
       </div>
     {/if}
+    {:else}
+      <div class="rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-500">
+        メンバーの追加はオーナーのみ可能です
+      </div>
+    {/if}
 
     {#if members.length > 0}
       <ul class="mt-4 space-y-2">
@@ -181,6 +188,7 @@
                 </span>
               </div>
             </div>
+            {#if isOwner}
             <button
               onclick={() => (confirmDeleteId = member.id)}
               class="ml-2 rounded p-1 text-gray-400 hover:text-red-500"
@@ -188,6 +196,7 @@
             >
               <Trash2 class="h-4 w-4" />
             </button>
+            {/if}
           </li>
         {/each}
       </ul>
