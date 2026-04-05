@@ -23,9 +23,10 @@
     settlementId: string
     inviteToken: string
     onBack: () => void
+    onNameResolved?: (name: string) => void
   }
 
-  let { settlementId, inviteToken, onBack }: Props = $props()
+  let { settlementId, inviteToken, onBack, onNameResolved }: Props = $props()
 
   // Capture props in closure to avoid stale reference warnings
   const sync = new SettlementSync({
@@ -50,6 +51,15 @@
   const expenses = $derived(stateToExpenses(sync.state))
   const settlementName = $derived(sync.state?.name ?? '精算')
   const isLocked = $derived(sync.state?.isLocked ?? false)
+
+  let nameNotified = false
+  $effect(() => {
+    const name = sync.state?.name
+    if (name && !nameNotified) {
+      nameNotified = true
+      onNameResolved?.(name)
+    }
+  })
 
   function stateToMembers(state: SettlementState | null): Member[] {
     if (!state?.members) return []
