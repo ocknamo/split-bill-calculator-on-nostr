@@ -15,7 +15,11 @@ export default defineConfig({
   projects: [
     {
       name: 'Mobile Chrome',
-      use: { ...devices['iPhone 14'] },
+      use: {
+        // Use Pixel 7 (Chromium-based) for mobile viewport testing
+        // Avoids requiring WebKit installation in CI
+        ...devices['Pixel 7'],
+      },
     },
   ],
   webServer: {
