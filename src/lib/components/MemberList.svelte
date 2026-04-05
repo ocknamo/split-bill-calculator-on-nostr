@@ -2,6 +2,7 @@
   import { Loader2, Trash2, UserPlus, Users, Zap } from 'lucide-svelte'
   import { isValidNpub, fetchNostrProfile } from '$lib/nostr/profile-rx'
   import type { Member } from '$lib/types/split-calculator'
+  import { resolveUniqueName } from '$lib/utils/member-name'
   import MemberAvatar from './MemberAvatar.svelte'
 
   interface Props {
@@ -23,8 +24,10 @@
   let confirmDeleteId = $state<string | null>(null)
 
   function addByName() {
-    if (!newName.trim()) return
-    onAddMember({ id: crypto.randomUUID(), name: newName.trim() })
+    const name = newName.trim().slice(0, 30)
+    if (!name) return
+    const uniqueName = resolveUniqueName(name, members)
+    onAddMember({ id: crypto.randomUUID(), name: uniqueName })
     newName = ''
   }
 
@@ -103,6 +106,7 @@
         <input
           type="text"
           placeholder="名前を入力"
+          maxlength="30"
           bind:value={newName}
           onkeydown={(e) => e.key === 'Enter' && addByName()}
           class="flex-1 rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"

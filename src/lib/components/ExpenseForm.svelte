@@ -67,7 +67,7 @@
         <input
           id="expense-amount"
           type="number"
-          min="0"
+          min="1"
           placeholder="0"
           bind:value={amount}
           onkeydown={(e) => e.key === 'Enter' && submit()}
