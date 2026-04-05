@@ -14,6 +14,8 @@ test.describe('スタンドアローンモード', () => {
     await page.evaluate(() => sessionStorage.clear());
     await page.reload();
     await page.waitForLoadState('networkidle');
+    // Default is now sync mode, switch to standalone
+    await page.getByRole('button', { name: 'スタンドアロン' }).click();
   });
 
   test('A1: メンバー1人追加', async ({ page }) => {
