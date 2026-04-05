@@ -25,6 +25,10 @@ vite.config.ts.timestamp-*
 # TypeScript
 *.tsbuildinfo
 
+# Playwright
+/test-results/
+/playwright-report/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
