@@ -4,6 +4,7 @@
   import { BtcPriceStore } from '$lib/stores/btc-price.svelte'
   import { generateInviteLink } from '$lib/nostr/settlement/settlement-sync.svelte'
   import { SettlementSync } from '$lib/nostr/settlement/settlement-sync.svelte'
+  import { base } from '$app/paths'
   import { calculateSettlements } from '$lib/settlements'
   import { formatCurrency, fiatToSats, formatBtcPrice, getCurrencySymbol } from '$lib/utils/currency'
   import type { Currency, Expense, Member, Settlement } from '$lib/types/split-calculator'
@@ -79,7 +80,7 @@
 
   const inviteLink = $derived(
     typeof window !== 'undefined'
-      ? generateInviteLink(settlementId, inviteToken, window.location.origin)
+      ? generateInviteLink(settlementId, inviteToken, window.location.origin + base)
       : ''
   )
 
@@ -161,6 +162,7 @@
     {#if !isLocked}
       <MemberList
         {members}
+        isOwner={sync.isOwner}
         onAddMember={(m) => sync.addMember(m.id, m.name, m.nostrProfile?.picture, m.nostrProfile?.lud16)}
         onRemoveMember={() => {}}
         formatCurrency={(a) => formatCurrency(a, currency)}
