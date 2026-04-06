@@ -14,6 +14,8 @@ test.describe('スタンドアローンモード', () => {
     await page.evaluate(() => sessionStorage.clear());
     await page.reload();
     await page.waitForLoadState('networkidle');
+    // Default is now sync mode, switch to standalone
+    await page.getByRole('button', { name: 'スタンドアロン' }).click();
   });
 
   test('A1: メンバー1人追加', async ({ page }) => {
@@ -134,6 +136,8 @@ test.describe('スタンドアローンモード', () => {
     // Reload the page
     await page.reload();
     await page.waitForLoadState('networkidle');
+    // After reload, default is sync mode, switch back to standalone
+    await page.getByRole('button', { name: 'スタンドアロン' }).click();
 
     // Data should persist via sessionStorage
     await expect(page.locator('span.truncate').filter({ hasText: '田中' })).toBeVisible();
