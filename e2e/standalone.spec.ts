@@ -136,6 +136,8 @@ test.describe('スタンドアローンモード', () => {
     // Reload the page
     await page.reload();
     await page.waitForLoadState('networkidle');
+    // After reload, default is sync mode, switch back to standalone
+    await page.getByRole('button', { name: 'スタンドアロン' }).click();
 
     // Data should persist via sessionStorage
     await expect(page.locator('span.truncate').filter({ hasText: '田中' })).toBeVisible();
