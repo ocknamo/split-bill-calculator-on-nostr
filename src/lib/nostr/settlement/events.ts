@@ -82,10 +82,11 @@ interface CreateExpenseEventParams {
   amount: number;
   currency: string;
   note: string;
+  cancelEventId?: string;
 }
 
 export async function createExpenseEvent(params: CreateExpenseEventParams): Promise<UnsignedEvent> {
-  const { settlementId, inviteToken, actorPubkey, memberPubkey, amount, currency, note } = params;
+  const { settlementId, inviteToken, actorPubkey, memberPubkey, amount, currency, note, cancelEventId } = params;
 
   const content: ExpenseContent = {
     member_pubkey: memberPubkey,
@@ -96,14 +97,20 @@ export async function createExpenseEvent(params: CreateExpenseEventParams): Prom
 
   const cap = await calculateCap(inviteToken, actorPubkey);
 
+  const tags: string[][] = [
+    ["d", settlementId],
+    ["cap", cap],
+  ];
+
+  if (cancelEventId) {
+    tags.push(["e", cancelEventId]);
+  }
+
   return {
     pubkey: actorPubkey,
     created_at: Math.floor(Date.now() / 1000),
     kind: EXPENSE_KIND,
-    tags: [
-      ["d", settlementId],
-      ["cap", cap],
-    ],
+    tags,
     content: JSON.stringify(content),
   };
 }

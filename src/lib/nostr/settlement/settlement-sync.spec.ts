@@ -117,6 +117,55 @@ describe("SettlementSync", () => {
     expect(typeof sync.lockSettlement).toBe("function");
   });
 
+  it("should expose removeMember method", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(typeof sync.removeMember).toBe("function");
+  });
+
+  it("should expose removeExpense method", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(typeof sync.removeExpense).toBe("function");
+  });
+
+  it("removeMember should throw if not owner", async () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    // loadOwnerKey returns null (mocked), so isOwner is false
+    await expect(sync.removeMember("some-member-id")).rejects.toThrow("Owner権限がありません");
+  });
+
+  it("removeExpense should throw if not initialized (no client)", async () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    // Not initialized, so #client is null
+    await expect(sync.removeExpense("some-expense-id")).rejects.toThrow("Not initialized");
+  });
+
+  it("removeExpense should throw if expense not found in state", async () => {
+    const { fetchSettlementEvents } = await import("$lib/nostr/settlement/relay-rx");
+    vi.mocked(fetchSettlementEvents).mockResolvedValueOnce([]);
+
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    await sync.init();
+    // state is null (no events), so expense won't be found
+    await expect(sync.removeExpense("nonexistent-expense-id")).rejects.toThrow(
+      "支出が見つかりません",
+    );
+  });
+
   it("should expose refresh method", () => {
     const sync = new SettlementSync({
       settlementId: "settlement-123",

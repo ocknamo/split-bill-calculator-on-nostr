@@ -44,6 +44,7 @@ export interface ExpenseData {
   note: string;
   actorPubkey: string;
   createdAt: number;
+  isCancelled: boolean;
 }
 
 export interface SettlementState {
@@ -107,6 +108,7 @@ export async function buildSettlementState(
   let validExpenses: ExpenseEvent[] = [];
   let invalidExpenses: InvalidExpense[] = [];
   let missingEventIds: string[] = [];
+  let expenses: ExpenseData[] = [];
 
   if (isLocked && lockEvent) {
     // After lock: only include accepted events
@@ -126,23 +128,23 @@ export async function buildSettlementState(
 
     // Check for missing accepted events
     missingEventIds = [...acceptedIds].filter((id) => !foundIds.has(id));
+
+    expenses = validExpenses.map((e) => toExpenseData(e, false));
   } else {
-    // Before lock: validate all expenses
-    const result = await categorizeExpenses(parsedEvents.expenses, inviteToken, validMemberPubkeys);
+    // Before lock: separate cancel events, then validate remaining
+    const { active, cancelled } = separateCancelledExpenses(
+      parsedEvents.expenses,
+      settlement.ownerPubkey,
+    );
+    const result = await categorizeExpenses(active, inviteToken, validMemberPubkeys);
     validExpenses = result.valid;
     invalidExpenses = result.invalid;
-  }
 
-  // Convert valid expenses to simplified format
-  const expenses: ExpenseData[] = validExpenses.map((e) => ({
-    eventId: e.id,
-    memberPubkey: e.parsedContent.member_pubkey,
-    amount: e.parsedContent.amount,
-    currency: e.parsedContent.currency,
-    note: e.parsedContent.note,
-    actorPubkey: e.pubkey,
-    createdAt: e.created_at,
-  }));
+    expenses = [
+      ...validExpenses.map((e) => toExpenseData(e, false)),
+      ...cancelled.map((e) => toExpenseData(e, true)),
+    ];
+  }
 
   return {
     name: settlement.parsedContent.name,
@@ -250,6 +252,52 @@ function findValidLockEvent(locks: LockEvent[], ownerPubkey: string): LockEvent 
   return validLocks.reduce((latest, current) =>
     current.created_at > latest.created_at ? current : latest,
   );
+}
+
+function toExpenseData(e: ExpenseEvent, isCancelled: boolean): ExpenseData {
+  return {
+    eventId: e.id,
+    memberPubkey: e.parsedContent.member_pubkey,
+    amount: e.parsedContent.amount,
+    currency: e.parsedContent.currency,
+    note: e.parsedContent.note,
+    actorPubkey: e.pubkey,
+    createdAt: e.created_at,
+    isCancelled,
+  };
+}
+
+function getTagValue(tags: string[][], tagName: string): string | undefined {
+  const tag = tags.find((t) => t[0] === tagName);
+  return tag?.[1];
+}
+
+function separateCancelledExpenses(
+  expenses: ExpenseEvent[],
+  ownerPubkey: string,
+): { active: ExpenseEvent[]; cancelled: ExpenseEvent[] } {
+  const cancelEvents = expenses.filter((e) => {
+    const targetId = getTagValue(e.tags, "e");
+    return targetId !== undefined && e.parsedContent.amount < 0;
+  });
+
+  const cancelledIds = new Set<string>();
+  const cancelEventIds = new Set<string>(cancelEvents.map((e) => e.id));
+
+  for (const cancel of cancelEvents) {
+    const targetId = getTagValue(cancel.tags, "e")!;
+    const target = expenses.find((e) => e.id === targetId);
+    if (!target) continue;
+    const isOwner = cancel.pubkey === ownerPubkey;
+    const isOriginalActor = cancel.pubkey === target.pubkey;
+    if (isOwner || isOriginalActor) {
+      cancelledIds.add(targetId);
+    }
+  }
+
+  const active = expenses.filter((e) => !cancelledIds.has(e.id) && !cancelEventIds.has(e.id));
+  const cancelled = expenses.filter((e) => cancelledIds.has(e.id));
+  return { active, cancelled };
 }
 
 async function categorizeExpenses(

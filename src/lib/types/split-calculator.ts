@@ -19,6 +19,7 @@ export interface Expense {
   amount: number;
   paidById: string;
   currency: Currency;
+  isCancelled?: boolean;
 }
 
 export interface Settlement {
