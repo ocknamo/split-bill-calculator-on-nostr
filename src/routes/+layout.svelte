@@ -9,11 +9,14 @@
   let { children } = $props()
 
   const ogImageUrl = `https://ocknamo.github.io${base}/ogp.png`
+  const siteUrl = `https://ocknamo.github.io${base}/`
 </script>
 
 <svelte:head>
   <title>ワリカンさん</title>
   <meta name="description" content="グループでの支払いを簡単に精算。Nostr連携でLightning送金も可能" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={siteUrl} />
   <meta property="og:title" content="ワリカンさん" />
   <meta
     property="og:description"
