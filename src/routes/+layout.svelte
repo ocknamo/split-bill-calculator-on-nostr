@@ -8,7 +8,7 @@
 
   let { children } = $props()
 
-  const ogImageUrl = `https://ocknamo.github.io${base}/ogp.png`
+  const ogImageUrl = `https://share.yabu.me/26bb2ebed6c552d670c804b0d655267b3c662b21e026d6e48ac93a6070530958/d9247b189c71491623c5418196c90ac530e7441a5dbe6eae526d9dd3446a50ba.png`
   const siteUrl = `https://ocknamo.github.io${base}/`
 </script>
 
