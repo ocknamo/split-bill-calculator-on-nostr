@@ -133,6 +133,35 @@ describe("SettlementSync", () => {
     expect(typeof sync.removeExpense).toBe("function");
   });
 
+  it("should expose canRemoveExpense method", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    expect(typeof sync.canRemoveExpense).toBe("function");
+  });
+
+  it("canRemoveExpense should return false when state is null", () => {
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    // state is null before init
+    expect(sync.canRemoveExpense("nonexistent-id")).toBe(false);
+  });
+
+  it("canRemoveExpense should return false for non-existent expense", async () => {
+    const { fetchSettlementEvents } = await import("$lib/nostr/settlement/relay-rx");
+    vi.mocked(fetchSettlementEvents).mockResolvedValueOnce([]);
+
+    const sync = new SettlementSync({
+      settlementId: "settlement-123",
+      inviteToken: "token-abc",
+    });
+    await sync.init();
+    expect(sync.canRemoveExpense("nonexistent-id")).toBe(false);
+  });
+
   it("removeMember should throw if not owner", async () => {
     const sync = new SettlementSync({
       settlementId: "settlement-123",
