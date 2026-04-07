@@ -30,7 +30,7 @@
         : 'text-gray-500 hover:text-gray-700'}"
     >
       <Wifi class="h-4 w-4" />
-      Nostr同期
+      オンライン同期
     </button>
     <button
       onclick={() => onModeChange('standalone')}

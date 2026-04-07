@@ -174,15 +174,15 @@ describe('ページルート (+page.svelte)', () => {
   })
 
   describe('精算作成フロー', () => {
-    // 「新しい精算を作成」ボタンは Nostr同期タブが選択時のみ表示される
+    // 「新しい精算を作成」ボタンは オンライン同期タブが選択時のみ表示される
     async function switchToSyncModeAndOpenDialog() {
-      const syncTabButton = screen.getByRole('button', { name: /Nostr同期/ })
+      const syncTabButton = screen.getByRole('button', { name: /オンライン同期/ })
       await fireEvent.click(syncTabButton)
       const createButton = await screen.findByRole('button', { name: /新しい精算を作成/ })
       await fireEvent.click(createButton)
     }
 
-    it('Nostr同期タブを選んで精算作成ダイアログが開ける', async () => {
+    it('オンライン同期タブを選んで精算作成ダイアログが開ける', async () => {
       render(Page)
 
       await switchToSyncModeAndOpenDialog()
