@@ -9,7 +9,6 @@
   import { formatCurrency, fiatToSats, formatBtcPrice, getCurrencySymbol } from '$lib/utils/currency'
   import type { Currency, Expense, Member, Settlement } from '$lib/types/split-calculator'
   import type { SettlementState } from '$lib/nostr/settlement/state'
-  import CurrencySwitcher from './CurrencySwitcher.svelte'
   import ExpenseForm from './ExpenseForm.svelte'
   import ExpenseList from './ExpenseList.svelte'
   import LightningPaymentModal from './LightningPaymentModal.svelte'
@@ -42,7 +41,6 @@
 
   onDestroy(() => sync.destroy())
 
-  let currency = $state<Currency>('jpy')
   let paidIds = $state<string[]>([])
   const paidSettlements = $derived(new Set(paidIds))
 
@@ -51,6 +49,7 @@
   const expenses = $derived(stateToExpenses(sync.state))
   const settlementName = $derived(sync.state?.name ?? '精算')
   const isLocked = $derived(sync.state?.isLocked ?? false)
+  const currency = $derived<Currency>((sync.state?.currency?.toLowerCase() as Currency) || 'jpy')
 
   let nameNotified = false
   $effect(() => {
@@ -255,10 +254,6 @@
         />
       </div>
     {/if}
-
-    <div class="mt-6 flex justify-center">
-      <CurrencySwitcher {currency} onCurrencyChange={(c) => (currency = c)} />
-    </div>
 
     <PriceFooter
       formattedBtcPrice={formatBtcPrice(priceStore.price, currency)}

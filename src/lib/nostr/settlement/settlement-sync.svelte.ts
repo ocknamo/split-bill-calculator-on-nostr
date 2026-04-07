@@ -183,7 +183,7 @@ export class SettlementSync {
   }
 
   async init(): Promise<void> {
-    const config: RelayConfig = { relays: [...this.#relays], timeout: 10000 };
+    const config: RelayConfig = { relays: [...this.#relays], timeout: 5000 };
 
     try {
       this.isLoading = true;
@@ -341,7 +341,7 @@ export class SettlementSync {
   }
 
   async refresh(): Promise<void> {
-    const config: RelayConfig = { relays: [...this.#relays], timeout: 10000 };
+    const config: RelayConfig = { relays: [...this.#relays], timeout: 5000 };
     this.isLoading = true;
     this.connectionStatus = "connecting";
 
