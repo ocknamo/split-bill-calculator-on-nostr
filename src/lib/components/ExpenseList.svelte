@@ -9,9 +9,10 @@
     currentCurrency: Currency
     formatCurrency: (amount: number) => string
     onRemoveExpense: (id: string) => void
+    canRemoveExpense?: (id: string) => boolean
   }
 
-  let { expenses, members, currentCurrency, formatCurrency, onRemoveExpense }: Props = $props()
+  let { expenses, members, currentCurrency, formatCurrency, onRemoveExpense, canRemoveExpense = () => true }: Props = $props()
 
   function getMember(id: string): Member | undefined {
     return members.find((m) => m.id === id)
@@ -46,7 +47,7 @@
               </span>
             {/if}
             <span class="text-sm font-semibold {expense.isCancelled ? 'line-through text-gray-400' : 'text-gray-900'}">{formatCurrency(expense.amount)}</span>
-            {#if !expense.isCancelled}
+            {#if !expense.isCancelled && canRemoveExpense(expense.id)}
               <button
                 onclick={() => onRemoveExpense(expense.id)}
                 class="rounded p-1 text-gray-300 hover:text-red-500"

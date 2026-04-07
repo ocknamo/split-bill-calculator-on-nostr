@@ -198,6 +198,7 @@
       currentCurrency={currency}
       formatCurrency={(a) => formatCurrency(a, currency)}
       onRemoveExpense={isLocked ? () => {} : (id) => sync.removeExpense(id)}
+      canRemoveExpense={isLocked ? () => false : (id) => sync.canRemoveExpense(id)}
     />
 
     {#if members.length > 0 && expenses.length > 0}

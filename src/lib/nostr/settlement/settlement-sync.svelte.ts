@@ -158,6 +158,13 @@ export class SettlementSync {
     return this.state?.isLocked ?? false;
   }
 
+  canRemoveExpense(expenseId: string): boolean {
+    if (this.isOwner) return true;
+    const expense = this.state?.expenses.find((e) => e.eventId === expenseId);
+    if (!expense) return false;
+    return expense.actorPubkey === this.#actorPubkey;
+  }
+
   #handleEvent(event: NostrEvent): void {
     if (this.#seenIds.has(event.id)) return;
     this.#seenIds.add(event.id);
