@@ -120,6 +120,16 @@
         <SplitCalculator />
       {/if}
     {/if}
+    <footer class="mt-12 text-center text-xs text-gray-400">
+      <a
+        href="https://github.com/ocknamo/split-bill-calculator-on-nostr"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:text-gray-600"
+      >
+        Source Code (GitHub)
+      </a>
+    </footer>
   </div>
 </div>
 
