@@ -256,6 +256,65 @@ export class SettlementSync {
     this.#handleEvent(event);
   }
 
+  async removeMember(memberId: string): Promise<void> {
+    if (!this.#ownerKey || !this.#client) {
+      throw new Error("Owner権限がありません");
+    }
+
+    const { sk, pubkey } = this.#ownerKey;
+    const existingMembers = this.state?.members || [];
+    const filtered = existingMembers.filter((m) => m.pubkey !== memberId);
+
+    const template = createMemberEvent({
+      settlementId: this.#settlementId,
+      ownerPubkey: pubkey,
+      members: filtered,
+    });
+
+    const event = finalizeEvent(template, sk);
+    await this.#client.publish(event);
+    this.#handleEvent(event);
+  }
+
+  async removeExpense(expenseId: string): Promise<void> {
+    if (!this.#client) {
+      throw new Error("Not initialized");
+    }
+
+    const expenseData = this.state?.expenses.find((e) => e.eventId === expenseId);
+    if (!expenseData) {
+      throw new Error("支出が見つかりません");
+    }
+
+    let signerSk: Uint8Array;
+    let signerPubkey: string;
+
+    if (this.#ownerKey) {
+      signerSk = this.#ownerKey.sk;
+      signerPubkey = this.#ownerKey.pubkey;
+    } else if (expenseData.actorPubkey === this.#actorPubkey) {
+      signerSk = this.#actorSk;
+      signerPubkey = this.#actorPubkey;
+    } else {
+      throw new Error("この支出を削除する権限がありません");
+    }
+
+    const template = await createExpenseEvent({
+      settlementId: this.#settlementId,
+      inviteToken: this.#inviteToken,
+      actorPubkey: signerPubkey,
+      memberPubkey: expenseData.memberPubkey,
+      amount: -expenseData.amount,
+      currency: expenseData.currency,
+      note: expenseData.note,
+      cancelEventId: expenseId,
+    });
+
+    const event = finalizeEvent(template, signerSk);
+    await this.#client.publish(event);
+    this.#handleEvent(event);
+  }
+
   async lockSettlement(acceptedEventIds: string[]): Promise<void> {
     if (!this.#ownerKey || !this.#client) {
       throw new Error("Owner権限がありません");

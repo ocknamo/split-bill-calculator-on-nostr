@@ -133,6 +133,44 @@ describe("createExpenseEvent", () => {
     const content = JSON.parse(event.content);
     expect(content.amount).toBe(-1000);
   });
+
+  it("should add e tag when cancelEventId is specified", async () => {
+    const settlementId = generateSettlementId();
+    const inviteToken = generateInviteToken();
+
+    const event = await createExpenseEvent({
+      settlementId,
+      inviteToken,
+      actorPubkey: "actor",
+      memberPubkey: "member",
+      amount: -3000,
+      currency: "JPY",
+      note: "Dinner",
+      cancelEventId: "original_expense_event_id",
+    });
+
+    const eTag = event.tags.find((t) => t[0] === "e");
+    expect(eTag).toBeDefined();
+    expect(eTag?.[1]).toBe("original_expense_event_id");
+  });
+
+  it("should not add e tag when cancelEventId is not specified", async () => {
+    const settlementId = generateSettlementId();
+    const inviteToken = generateInviteToken();
+
+    const event = await createExpenseEvent({
+      settlementId,
+      inviteToken,
+      actorPubkey: "actor",
+      memberPubkey: "member",
+      amount: 3000,
+      currency: "JPY",
+      note: "Dinner",
+    });
+
+    const eTag = event.tags.find((t) => t[0] === "e");
+    expect(eTag).toBeUndefined();
+  });
 });
 
 describe("createLockEvent", () => {

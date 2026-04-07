@@ -34,8 +34,8 @@
             <MemberAvatar member={payer} size="sm" />
           {/if}
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-medium text-gray-800">{expense.description}</p>
-            <p class="text-xs text-gray-400">{payer?.name ?? '不明'}</p>
+            <p class="truncate text-sm font-medium {expense.isCancelled ? 'line-through text-gray-400' : 'text-gray-800'}">{expense.description}</p>
+            <p class="text-xs {expense.isCancelled ? 'line-through text-gray-300' : 'text-gray-400'}">{payer?.name ?? '不明'}</p>
           </div>
           <div class="flex shrink-0 items-center gap-2">
             {#if expense.currency !== currentCurrency}
@@ -45,14 +45,16 @@
                 {expense.currency.toUpperCase()}
               </span>
             {/if}
-            <span class="text-sm font-semibold text-gray-900">{formatCurrency(expense.amount)}</span>
-            <button
-              onclick={() => onRemoveExpense(expense.id)}
-              class="rounded p-1 text-gray-300 hover:text-red-500"
-              aria-label="{expense.description}を削除"
-            >
-              <Trash2 class="h-4 w-4" />
-            </button>
+            <span class="text-sm font-semibold {expense.isCancelled ? 'line-through text-gray-400' : 'text-gray-900'}">{formatCurrency(expense.amount)}</span>
+            {#if !expense.isCancelled}
+              <button
+                onclick={() => onRemoveExpense(expense.id)}
+                class="rounded p-1 text-gray-300 hover:text-red-500"
+                aria-label="{expense.description}を削除"
+              >
+                <Trash2 class="h-4 w-4" />
+              </button>
+            {/if}
           </div>
         </li>
       {/each}

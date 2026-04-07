@@ -79,13 +79,18 @@
       amount: e.amount,
       paidById: e.memberPubkey,
       currency: ((e.currency?.toLowerCase() || 'jpy') as Currency),
+      isCancelled: e.isCancelled,
     }))
   }
 
-  const { totalAmount, perPerson, settlements } = $derived(calculateSettlements(members, expenses))
+  const { totalAmount, perPerson, settlements } = $derived(
+    calculateSettlements(members, expenses.filter((e) => !e.isCancelled))
+  )
 
   function getMemberPaidTotal(memberId: string): number {
-    return expenses.filter((e) => e.paidById === memberId).reduce((s, e) => s + e.amount, 0)
+    return expenses
+      .filter((e) => e.paidById === memberId && !e.isCancelled)
+      .reduce((s, e) => s + e.amount, 0)
   }
 
   const inviteLink = $derived(
@@ -174,7 +179,7 @@
         {members}
         isOwner={sync.isOwner}
         onAddMember={(m) => sync.addMember(m.id, m.name, m.nostrProfile?.picture, m.nostrProfile?.lud16)}
-        onRemoveMember={() => {}}
+        onRemoveMember={(id) => sync.removeMember(id)}
         formatCurrency={(a) => formatCurrency(a, currency)}
         {getMemberPaidTotal}
       />
@@ -192,7 +197,7 @@
       {members}
       currentCurrency={currency}
       formatCurrency={(a) => formatCurrency(a, currency)}
-      onRemoveExpense={() => {}}
+      onRemoveExpense={isLocked ? () => {} : (id) => sync.removeExpense(id)}
     />
 
     {#if members.length > 0 && expenses.length > 0}

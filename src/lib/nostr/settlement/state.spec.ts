@@ -268,4 +268,170 @@ describe("buildSettlementState", () => {
     expect(state?.members).toHaveLength(1);
     expect(state?.members[0].pubkey).toBe(member1Pubkey);
   });
+
+  describe("expense cancellation (pre-lock)", () => {
+    it("should mark expense as isCancelled when owner publishes cancel event", async () => {
+      const { settlementEvent, memberEvent, expense1, expense2 } = await createTestEvents();
+
+      // Owner cancels expense1
+      const cancelEvent = await mockSign(
+        await createExpenseEvent({
+          settlementId,
+          inviteToken,
+          actorPubkey: ownerPubkey,
+          memberPubkey: member1Pubkey,
+          amount: -3000,
+          currency: "JPY",
+          note: "Dinner",
+          cancelEventId: "expense1_id",
+        }),
+        "cancel_expense1_id",
+      );
+
+      const events = [settlementEvent, memberEvent, expense1, expense2, cancelEvent];
+      const state = await buildSettlementState(events, inviteToken, settlementId);
+
+      expect(state).not.toBeNull();
+      const cancelledExpense = state?.expenses.find((e) => e.eventId === "expense1_id");
+      expect(cancelledExpense).toBeDefined();
+      expect(cancelledExpense?.isCancelled).toBe(true);
+
+      const activeExpense = state?.expenses.find((e) => e.eventId === "expense2_id");
+      expect(activeExpense?.isCancelled).toBe(false);
+    });
+
+    it("should mark expense as isCancelled when original actor publishes cancel event", async () => {
+      const { settlementEvent, memberEvent, expense1 } = await createTestEvents();
+
+      // expense1 was signed by ownerPubkey, so ownerPubkey is the original actor
+      const cancelEvent = await mockSign(
+        await createExpenseEvent({
+          settlementId,
+          inviteToken,
+          actorPubkey: ownerPubkey, // same as original actor
+          memberPubkey: member1Pubkey,
+          amount: -3000,
+          currency: "JPY",
+          note: "Dinner",
+          cancelEventId: "expense1_id",
+        }),
+        "cancel_by_actor_id",
+      );
+
+      const events = [settlementEvent, memberEvent, expense1, cancelEvent];
+      const state = await buildSettlementState(events, inviteToken, settlementId);
+
+      const cancelledExpense = state?.expenses.find((e) => e.eventId === "expense1_id");
+      expect(cancelledExpense?.isCancelled).toBe(true);
+    });
+
+    it("should ignore cancel event from unauthorized third party", async () => {
+      const { settlementEvent, memberEvent, expense1 } = await createTestEvents();
+
+      // Third party (not owner, not original actor) tries to cancel
+      const cancelEvent = await mockSign(
+        await createExpenseEvent({
+          settlementId,
+          inviteToken,
+          actorPubkey: member2Pubkey, // different from expense1's actor (ownerPubkey)
+          memberPubkey: member1Pubkey,
+          amount: -3000,
+          currency: "JPY",
+          note: "Dinner",
+          cancelEventId: "expense1_id",
+        }),
+        "unauthorized_cancel_id",
+      );
+
+      const events = [settlementEvent, memberEvent, expense1, cancelEvent];
+      const state = await buildSettlementState(events, inviteToken, settlementId);
+
+      const expense = state?.expenses.find((e) => e.eventId === "expense1_id");
+      expect(expense?.isCancelled).toBe(false);
+    });
+
+    it("should ignore cancel event referencing unknown expense id", async () => {
+      const { settlementEvent, memberEvent, expense1 } = await createTestEvents();
+
+      const cancelEvent = await mockSign(
+        await createExpenseEvent({
+          settlementId,
+          inviteToken,
+          actorPubkey: ownerPubkey,
+          memberPubkey: member1Pubkey,
+          amount: -3000,
+          currency: "JPY",
+          note: "Dinner",
+          cancelEventId: "nonexistent_expense_id",
+        }),
+        "cancel_nonexistent_id",
+      );
+
+      const events = [settlementEvent, memberEvent, expense1, cancelEvent];
+      const state = await buildSettlementState(events, inviteToken, settlementId);
+
+      expect(state?.expenses).toHaveLength(1);
+      expect(state?.expenses[0].isCancelled).toBe(false);
+    });
+
+    it("should not include cancel events themselves in expenses list", async () => {
+      const { settlementEvent, memberEvent, expense1 } = await createTestEvents();
+
+      const cancelEvent = await mockSign(
+        await createExpenseEvent({
+          settlementId,
+          inviteToken,
+          actorPubkey: ownerPubkey,
+          memberPubkey: member1Pubkey,
+          amount: -3000,
+          currency: "JPY",
+          note: "Dinner",
+          cancelEventId: "expense1_id",
+        }),
+        "cancel_expense1_id",
+      );
+
+      const events = [settlementEvent, memberEvent, expense1, cancelEvent];
+      const state = await buildSettlementState(events, inviteToken, settlementId);
+
+      // Only expense1 (as cancelled), cancel event itself should not appear
+      expect(state?.expenses).toHaveLength(1);
+      expect(state?.expenses[0].eventId).toBe("expense1_id");
+    });
+
+    it("should ignore cancel events after lock", async () => {
+      const { settlementEvent, memberEvent, expense1, expense2 } = await createTestEvents();
+
+      const lockEvent = await mockSign(
+        createLockEvent({
+          settlementId,
+          ownerPubkey,
+          acceptedEventIds: ["expense1_id", "expense2_id"],
+        }),
+        "lock_event_id",
+      );
+
+      const cancelEvent = await mockSign(
+        await createExpenseEvent({
+          settlementId,
+          inviteToken,
+          actorPubkey: ownerPubkey,
+          memberPubkey: member1Pubkey,
+          amount: -3000,
+          currency: "JPY",
+          note: "Dinner",
+          cancelEventId: "expense1_id",
+        }),
+        "cancel_expense1_id",
+      );
+
+      const events = [settlementEvent, memberEvent, expense1, expense2, lockEvent, cancelEvent];
+      const state = await buildSettlementState(events, inviteToken, settlementId);
+
+      expect(state?.isLocked).toBe(true);
+      // After lock, cancel events are ignored; both accepted expenses are isCancelled: false
+      expect(state?.expenses).toHaveLength(2);
+      expect(state?.expenses.every((e) => !e.isCancelled)).toBe(true);
+    });
+  });
 });
